@@ -1,0 +1,66 @@
+import * as ImagePicker from 'expo-image-picker';
+import { supabase } from '../lib/supabase';
+
+/**
+ * Pick an image from the device library and upload to Supabase Storage.
+ * @param userId - The user's ID (used as folder prefix)
+ * @param bucket - The storage bucket name ('avatars' or 'medical-docs')
+ * @returns The public URL of the uploaded image, or an error
+ */
+export async function pickAndUploadImage(
+  userId: string,
+  bucket: 'avatars' | 'medical-docs' = 'avatars'
+): Promise<{ url: string | null; error: string | null }> {
+  // Request permissions
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== 'granted') {
+    return { url: null, error: 'Media library permission not granted.' };
+  }
+
+  // Launch picker
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.7,
+  });
+
+  if (result.canceled || !result.assets?.[0]) {
+    return { url: null, error: 'Image selection cancelled.' };
+  }
+
+  const asset = result.assets[0];
+  const ext = asset.uri.split('.').pop() ?? 'jpg';
+  const filePath = `${userId}/avatar.${ext}`;
+
+  // Fetch as blob
+  const response = await fetch(asset.uri);
+  const blob = await response.blob();
+
+  // Upload
+  const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, blob, {
+    upsert: true,
+    contentType: `image/${ext}`,
+  });
+
+  if (uploadError) return { url: null, error: uploadError.message };
+
+  // Get public URL
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+  return { url: data.publicUrl, error: null };
+}
+
+/**
+ * Delete a file from Supabase Storage.
+ */
+export async function deleteFile(bucket: string, path: string) {
+  return supabase.storage.from(bucket).remove([path]);
+}
+
+/**
+ * Get a public URL for a storage path.
+ */
+export function getPublicUrl(bucket: string, path: string): string {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}

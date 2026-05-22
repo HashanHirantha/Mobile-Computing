@@ -1,0 +1,57 @@
+import { supabase } from '../lib/supabase';
+
+interface AppointmentPayload {
+  patient_id: string;
+  doctor_id: string;
+  appointment_date: string;
+  appointment_time: string;
+  disease_id?: number | null;
+  symptoms_text?: string | null;
+  notes?: string | null;
+}
+
+/**
+ * Create a new appointment booking.
+ */
+export async function createAppointment(payload: AppointmentPayload) {
+  return supabase.from('appointments').insert({ ...payload, status: 'pending' });
+}
+
+/**
+ * Fetch all appointments for the current user (patient).
+ */
+export async function getPatientAppointments(userId: string) {
+  return supabase
+    .from('appointments')
+    .select('*, doctors(specialty, consultation_fee, profiles(first_name, last_name, profile_image))')
+    .eq('patient_id', userId)
+    .order('appointment_date', { ascending: true });
+}
+
+/**
+ * Get a single appointment by ID.
+ */
+export async function getAppointmentById(id: string) {
+  return supabase
+    .from('appointments')
+    .select('*, doctors(specialty, hospital_name, consultation_fee, profiles(first_name, last_name, profile_image)), diseases(name, severity)')
+    .eq('id', id)
+    .single();
+}
+
+/**
+ * Update appointment status.
+ */
+export async function updateAppointmentStatus(id: string, status: string, reason?: string) {
+  return supabase
+    .from('appointments')
+    .update({ status, cancellation_reason: reason ?? null })
+    .eq('id', id);
+}
+
+/**
+ * Cancel an appointment.
+ */
+export async function cancelAppointment(id: string, reason?: string) {
+  return updateAppointmentStatus(id, 'cancelled', reason);
+}
