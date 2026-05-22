@@ -1,0 +1,39 @@
+# Node dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Supabase local environment
+supabase/.temp/
+supabase/.branches/
+supabase/dump.sql
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs and OS files
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# AI context files (optional, but good to ignore if you don't want them in version control)
+# .AI/
