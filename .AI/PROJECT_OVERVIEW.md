@@ -10,63 +10,68 @@
 
 ## Tech Stack
 
-| Layer              | Technology                                      |
-| :----------------- | :---------------------------------------------- |
-| **Mobile Frontend** | React Native (Expo SDK 54) + TypeScript         |
-| **Backend API**     | Node.js + Express.js + TypeScript               |
-| **Database**        | PostgreSQL (via Sequelize ORM)                  |
-| **Authentication**  | JWT (JSON Web Tokens) + bcrypt                  |
-| **State Management**| React Context API + AsyncStorage                |
-| **Navigation**      | React Navigation v6 (Stack + Bottom Tabs)       |
-| **HTTP Client**     | Axios                                           |
-| **Styling**         | React Native StyleSheet + Custom Theme System   |
-| **Push Notifications** | Expo Notifications                           |
-| **Maps/Location**   | React Native Maps + Expo Location               |
-| **Image Handling**  | Expo Image Picker                               |
+| Layer               | Technology                                           |
+| :------------------ | :--------------------------------------------------- |
+| **Mobile Frontend** | React Native (Expo SDK 54) + TypeScript              |
+| **Backend / BaaS**  | Supabase (PostgreSQL, Auth, Storage, Edge Functions)  |
+| **Database**        | Supabase PostgreSQL (with Row Level Security)         |
+| **Authentication**  | Supabase Auth (Email/Password, OAuth, Magic Links)    |
+| **Realtime**        | Supabase Realtime (Postgres Changes subscriptions)    |
+| **Storage**         | Supabase Storage (profile images, medical docs)       |
+| **Edge Functions**  | Supabase Edge Functions (Deno/TypeScript)             |
+| **State Management**| React Context API + AsyncStorage                     |
+| **Navigation**      | React Navigation v6 (Stack + Bottom Tabs)            |
+| **HTTP Client**     | Supabase JS Client (`@supabase/supabase-js`)         |
+| **Styling**         | React Native StyleSheet + Custom Theme System        |
+| **Push Notifications** | Expo Notifications                                |
+| **Maps/Location**   | React Native Maps + Expo Location                    |
+| **Image Handling**  | Expo Image Picker + Supabase Storage                 |
 
 ---
 
 ## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  MOBILE APP (React Native)           │
-│  ┌───────────┐  ┌───────────┐  ┌─────────────────┐  │
-│  │  Auth      │  │ Symptom   │  │ Doctor          │  │
-│  │  Screens   │  │ Checker   │  │ Recommendation  │  │
-│  └─────┬─────┘  └─────┬─────┘  └───────┬─────────┘  │
-│        │              │                 │            │
-│        └──────────────┼─────────────────┘            │
-│                       │                              │
-│              ┌────────▼────────┐                     │
-│              │  API Service    │                     │
-│              │  (Axios)        │                     │
-│              └────────┬────────┘                     │
-└───────────────────────┼─────────────────────────────┘
-                        │  HTTPS / REST
-┌───────────────────────┼─────────────────────────────┐
-│              BACKEND (Express.js)                    │
-│              ┌────────▼────────┐                     │
-│              │  API Gateway    │                     │
-│              │  (Routes)       │                     │
-│              └────────┬────────┘                     │
-│     ┌─────────────────┼─────────────────┐            │
-│     │                 │                 │            │
-│  ┌──▼───┐  ┌─────────▼──────┐  ┌──────▼──────┐     │
-│  │ Auth │  │  Disease       │  │  Doctor     │     │
-│  │ Ctrl │  │  Prediction    │  │  Matching   │     │
-│  │      │  │  Engine        │  │  Engine     │     │
-│  └──┬───┘  └───────┬────────┘  └──────┬──────┘     │
-│     │              │                   │            │
-│     └──────────────┼───────────────────┘            │
-│              ┌─────▼──────┐                         │
-│              │ Sequelize  │                         │
-│              │ ORM        │                         │
-│              └─────┬──────┘                         │
-│              ┌─────▼──────┐                         │
-│              │ PostgreSQL │                         │
-│              └────────────┘                         │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                  MOBILE APP (React Native / Expo)        │
+│  ┌───────────┐  ┌───────────┐  ┌─────────────────────┐  │
+│  │  Auth      │  │ Symptom   │  │ Doctor              │  │
+│  │  Screens   │  │ Checker   │  │ Recommendation      │  │
+│  └─────┬─────┘  └─────┬─────┘  └───────┬─────────────┘  │
+│        │              │                 │                │
+│        └──────────────┼─────────────────┘                │
+│                       │                                  │
+│              ┌────────▼────────┐                         │
+│              │  Supabase JS    │                         │
+│              │  Client SDK     │                         │
+│              └────────┬────────┘                         │
+└───────────────────────┼─────────────────────────────────┘
+                        │  HTTPS
+┌───────────────────────┼─────────────────────────────────┐
+│            SUPABASE CLOUD PLATFORM                       │
+│              ┌────────▼────────┐                         │
+│              │  API Gateway    │                         │
+│              │  (PostgREST +   │                         │
+│              │   GoTrue Auth)  │                         │
+│              └────────┬────────┘                         │
+│     ┌─────────────────┼─────────────────┐                │
+│     │                 │                 │                │
+│  ┌──▼──────┐  ┌───────▼──────┐  ┌──────▼──────────┐     │
+│  │ Auth    │  │  Edge        │  │  Realtime       │     │
+│  │ (GoTrue)│  │  Functions   │  │  (WebSocket)    │     │
+│  │         │  │  (Deno)      │  │                 │     │
+│  └──┬──────┘  └───────┬──────┘  └──────┬──────────┘     │
+│     │                 │                │                │
+│     └─────────────────┼────────────────┘                │
+│              ┌────────▼────────┐                         │
+│              │  PostgreSQL     │                         │
+│              │  (with RLS)     │                         │
+│              └────────┬────────┘                         │
+│              ┌────────▼────────┐                         │
+│              │  Storage        │                         │
+│              │  (S3-compatible)│                         │
+│              └─────────────────┘                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -76,13 +81,14 @@
 ### Phase 1 — Foundation (MVP)
 
 1. **User Authentication**
-   - Register / Login (Email + Password)
-   - JWT-based session management
-   - Profile management (name, age, gender, blood group, allergies)
-   - Password reset via email OTP
+   - Register / Login (Email + Password) via Supabase Auth
+   - Session management with Supabase `onAuthStateChange` listener
+   - Profile management (name, age, gender, blood group, allergies) stored in `profiles` table
+   - Password reset via Supabase Auth built-in email flow
+   - OAuth social logins (Google, Apple) — optional
 
 2. **Symptom Checker**
-   - Searchable symptom list with autocomplete
+   - Searchable symptom list with autocomplete (Supabase `ilike` / full-text search)
    - Multi-select symptom input with body-part visual selector
    - Duration & severity input per symptom
    - Symptom history log
@@ -92,16 +98,18 @@
    - Confidence score per predicted disease
    - Disease detail cards (description, precautions, severity level)
    - Emergency flag for critical conditions
+   - Prediction logic runs as a Supabase Edge Function or client-side
 
 4. **Doctor Recommendation**
    - Specialty-based doctor filtering from predicted disease
    - Doctor profiles (name, specialty, hospital, experience, rating)
-   - Location-based sorting (nearest doctors)
+   - Location-based sorting (nearest doctors) via PostGIS or coordinate math
    - Doctor availability / time-slot viewing
 
 5. **Appointment Booking**
    - Select doctor → pick date/time → confirm booking
    - Booking history & status tracking (Pending / Confirmed / Completed / Cancelled)
+   - Realtime booking status updates via Supabase Realtime subscriptions
    - In-app booking notifications
 
 ### Phase 2 — Enhanced Experience
@@ -113,7 +121,7 @@
 
 7. **Doctor Dashboard (Doctor Role)**
    - Doctor registration & profile management
-   - View incoming appointment requests
+   - View incoming appointment requests (realtime)
    - Accept / Reject / Reschedule bookings
    - Patient symptom summary view
 
@@ -123,21 +131,21 @@
    - Average rating display on doctor cards
 
 9. **Push Notifications**
-   - Appointment reminders
+   - Appointment reminders (via Supabase Edge Functions + Expo Push)
    - Health tips & alerts
    - Booking status updates
 
 ### Phase 3 — Advanced Features
 
 10. **AI-Enhanced Prediction** (Future)
-    - ML model integration (Random Forest / SVM) via Python microservice
+    - ML model integration (Random Forest / SVM) via Supabase Edge Function calling a Python microservice
     - NLP-based symptom input ("I have headache and fever")
     - Continuous model improvement from feedback
 
 11. **Telemedicine / Video Consultation**
     - In-app video calling
-    - Chat with doctor
-    - Prescription sharing
+    - Chat with doctor (Supabase Realtime)
+    - Prescription sharing (Supabase Storage)
 
 12. **Health Articles & Awareness**
     - Curated health articles by category
@@ -152,59 +160,11 @@
 Mobile-Computing/
 ├── .AI/                          # AI-assisted development docs
 │   ├── PROJECT_OVERVIEW.md       # This file
-│   ├── DATABASE_SCHEMA.md        # Database tables & relationships
+│   ├── DATABASE_SCHEMA.md        # Supabase tables, RLS policies & relationships
 │   └── FUTURE_FEATURES.md       # Roadmap & feature backlog
 │
-├── Backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   ├── database.ts       # Sequelize DB connection config
-│   │   │   └── environment.ts    # Environment variable loader
-│   │   ├── controllers/
-│   │   │   ├── authController.ts
-│   │   │   ├── symptomController.ts
-│   │   │   ├── diseaseController.ts
-│   │   │   ├── doctorController.ts
-│   │   │   ├── appointmentController.ts
-│   │   │   └── userController.ts
-│   │   ├── middleware/
-│   │   │   ├── authMiddleware.ts  # JWT verification
-│   │   │   ├── errorHandler.ts   # Global error handler
-│   │   │   └── validate.ts       # Request validation
-│   │   ├── models/
-│   │   │   ├── User.ts
-│   │   │   ├── Symptom.ts
-│   │   │   ├── Disease.ts
-│   │   │   ├── DiseaseSymptom.ts  # Junction table
-│   │   │   ├── Doctor.ts
-│   │   │   ├── DoctorSpecialty.ts
-│   │   │   ├── Appointment.ts
-│   │   │   ├── Review.ts
-│   │   │   ├── MedicalHistory.ts
-│   │   │   └── index.ts          # Model associations
-│   │   ├── routes/
-│   │   │   ├── authRoutes.ts
-│   │   │   ├── symptomRoutes.ts
-│   │   │   ├── diseaseRoutes.ts
-│   │   │   ├── doctorRoutes.ts
-│   │   │   ├── appointmentRoutes.ts
-│   │   │   └── userRoutes.ts
-│   │   ├── services/
-│   │   │   ├── predictionService.ts   # Disease prediction logic
-│   │   │   └── recommendationService.ts # Doctor matching logic
-│   │   ├── seeders/
-│   │   │   ├── symptomSeeder.ts
-│   │   │   ├── diseaseSeeder.ts
-│   │   │   └── doctorSeeder.ts
-│   │   ├── utils/
-│   │   │   ├── jwt.ts
-│   │   │   └── helpers.ts
-│   │   └── app.ts                # Express app entry point
-│   ├── .env                      # Environment variables
-│   ├── package.json
-│   └── tsconfig.json
-│
 ├── Frontend/
+│   ├── UI/                       # UI mockup images
 │   ├── app/                      # Expo Router (file-based routing)
 │   │   ├── (auth)/
 │   │   │   ├── login.tsx
@@ -241,17 +201,30 @@ Mobile-Computing/
 │   │   ├── BodySelector.tsx      # Interactive body-part picker
 │   │   └── RatingStars.tsx
 │   ├── contexts/
-│   │   ├── AuthContext.tsx
+│   │   ├── AuthContext.tsx        # Wraps Supabase Auth state
 │   │   └── HealthContext.tsx
+│   ├── lib/
+│   │   └── supabase.ts           # Supabase client initialization
 │   ├── services/
-│   │   └── api.ts                # Axios instance + API calls
+│   │   ├── authService.ts        # Supabase Auth wrappers
+│   │   ├── symptomService.ts     # Symptom queries
+│   │   ├── diseaseService.ts     # Disease queries & prediction
+│   │   ├── doctorService.ts      # Doctor queries
+│   │   ├── appointmentService.ts # Appointment CRUD
+│   │   └── storageService.ts     # Supabase Storage wrappers
 │   ├── hooks/
 │   │   ├── useAuth.ts
 │   │   ├── useSymptoms.ts
-│   │   └── useDoctors.ts
+│   │   ├── useDoctors.ts
+│   │   └── useRealtime.ts        # Supabase Realtime subscription hook
+│   ├── types/
+│   │   ├── database.types.ts     # Auto-generated Supabase DB types
+│   │   └── index.ts              # App-level type definitions
 │   ├── constants/
 │   │   ├── theme.ts              # Colors, fonts, spacing
-│   │   └── config.ts             # API base URL, keys
+│   │   └── config.ts             # Supabase URL & anon key
+│   ├── utils/
+│   │   └── helpers.ts            # Utility functions
 │   ├── assets/
 │   │   ├── images/
 │   │   └── icons/
@@ -259,96 +232,131 @@ Mobile-Computing/
 │   ├── package.json
 │   └── tsconfig.json
 │
+├── supabase/                     # Supabase local development config
+│   ├── config.toml               # Supabase CLI project config
+│   ├── migrations/               # SQL migration files
+│   │   ├── 00001_create_profiles.sql
+│   │   ├── 00002_create_symptoms.sql
+│   │   ├── 00003_create_diseases.sql
+│   │   ├── 00004_create_disease_symptoms.sql
+│   │   ├── 00005_create_doctors.sql
+│   │   ├── 00006_create_doctor_specialties.sql
+│   │   ├── 00007_create_appointments.sql
+│   │   ├── 00008_create_reviews.sql
+│   │   ├── 00009_create_medical_history.sql
+│   │   ├── 00010_create_diagnosis_history.sql
+│   │   └── 00011_enable_rls_policies.sql
+│   ├── seed.sql                  # Seed data (symptoms, diseases, doctors)
+│   └── functions/                # Supabase Edge Functions
+│       ├── predict-disease/
+│       │   └── index.ts          # Disease prediction logic
+│       └── send-notification/
+│           └── index.ts          # Push notification dispatcher
+│
 └── README.md
 ```
 
 ---
 
-## API Endpoints
+## Supabase Client Data Access Patterns
 
-### Authentication
-| Method | Endpoint                | Description             | Auth |
-| :----- | :---------------------- | :---------------------- | :--- |
-| POST   | `/api/auth/register`    | Register new user       | ❌    |
-| POST   | `/api/auth/login`       | Login & get JWT         | ❌    |
-| POST   | `/api/auth/forgot-password` | Send OTP to email   | ❌    |
-| POST   | `/api/auth/reset-password`  | Reset with OTP      | ❌    |
-| GET    | `/api/auth/me`          | Get current user profile| ✅    |
+> **Note**: With Supabase, the mobile app queries the database **directly** through the Supabase JS client using PostgREST. There is no separate Express.js backend. Row Level Security (RLS) policies enforce access control at the database level.
 
-### Symptoms
-| Method | Endpoint                | Description                    | Auth |
-| :----- | :---------------------- | :----------------------------- | :--- |
-| GET    | `/api/symptoms`         | List all symptoms              | ✅    |
-| GET    | `/api/symptoms/search?q=` | Search symptoms by keyword   | ✅    |
-| GET    | `/api/symptoms/body-part/:part` | Get symptoms by body part | ✅   |
+### Authentication (Supabase Auth)
 
-### Disease Prediction
-| Method | Endpoint                     | Description                        | Auth |
-| :----- | :--------------------------- | :--------------------------------- | :--- |
-| POST   | `/api/predict`               | Submit symptoms → get predictions  | ✅    |
-| GET    | `/api/diseases/:id`          | Get disease details                | ✅    |
-| GET    | `/api/diseases/:id/precautions` | Get precaution tips             | ✅    |
+| Operation                | Supabase Client Method                                     |
+| :----------------------- | :--------------------------------------------------------- |
+| Register new user        | `supabase.auth.signUp({ email, password })`                |
+| Login                    | `supabase.auth.signInWithPassword({ email, password })`    |
+| Forgot password          | `supabase.auth.resetPasswordForEmail(email)`               |
+| Get current session      | `supabase.auth.getSession()`                               |
+| Listen to auth changes   | `supabase.auth.onAuthStateChange(callback)`                |
+| Logout                   | `supabase.auth.signOut()`                                  |
+| OAuth login              | `supabase.auth.signInWithOAuth({ provider: 'google' })`   |
 
-### Doctors
-| Method | Endpoint                          | Description                     | Auth |
-| :----- | :-------------------------------- | :------------------------------ | :--- |
-| GET    | `/api/doctors`                    | List all doctors (with filters) | ✅    |
-| GET    | `/api/doctors/:id`                | Get doctor detail               | ✅    |
-| GET    | `/api/doctors/specialty/:name`    | Get doctors by specialty        | ✅    |
-| GET    | `/api/doctors/:id/availability`   | Get available time slots        | ✅    |
-| GET    | `/api/doctors/:id/reviews`        | Get doctor reviews              | ✅    |
-| POST   | `/api/doctors/:id/reviews`        | Submit a review                 | ✅    |
+### Data Queries (PostgREST via Supabase Client)
 
-### Appointments
-| Method | Endpoint                     | Description                | Auth |
-| :----- | :--------------------------- | :------------------------- | :--- |
-| POST   | `/api/appointments`          | Create new appointment     | ✅    |
-| GET    | `/api/appointments`          | Get user's appointments    | ✅    |
-| GET    | `/api/appointments/:id`      | Get appointment detail     | ✅    |
-| PATCH  | `/api/appointments/:id`      | Update status              | ✅    |
-| DELETE | `/api/appointments/:id`      | Cancel appointment         | ✅    |
+| Operation                             | Supabase Client Call                                                       |
+| :------------------------------------ | :------------------------------------------------------------------------- |
+| List all symptoms                     | `supabase.from('symptoms').select('*')`                                    |
+| Search symptoms                       | `supabase.from('symptoms').select('*').ilike('name', '%query%')`           |
+| Symptoms by body part                 | `supabase.from('symptoms').select('*').eq('body_part', part)`              |
+| Get disease details                   | `supabase.from('diseases').select('*').eq('id', id).single()`              |
+| Get disease-symptom mappings          | `supabase.from('disease_symptoms').select('*, diseases(*), symptoms(*)')` |
+| List doctors (with filters)           | `supabase.from('doctors').select('*, profiles(*)').eq('specialty', name)` |
+| Get doctor detail                     | `supabase.from('doctors').select('*, profiles(*), reviews(*)').eq('id', id).single()` |
+| Create appointment                    | `supabase.from('appointments').insert({ ... })`                           |
+| Get user's appointments               | `supabase.from('appointments').select('*, doctors(*, profiles(*))').eq('patient_id', userId)` |
+| Update appointment status             | `supabase.from('appointments').update({ status }).eq('id', id)`           |
+| Get user profile                      | `supabase.from('profiles').select('*').eq('id', userId).single()`         |
+| Update user profile                   | `supabase.from('profiles').update({ ... }).eq('id', userId)`              |
+| Get medical history                   | `supabase.from('medical_history').select('*').eq('user_id', userId)`      |
+| Add medical history                   | `supabase.from('medical_history').insert({ ... })`                        |
+| Get diagnosis history                 | `supabase.from('diagnosis_history').select('*, diseases(*)').eq('user_id', userId)` |
+| Submit review                         | `supabase.from('reviews').insert({ ... })`                                |
+| Get doctor reviews                    | `supabase.from('reviews').select('*, profiles(first_name, last_name)').eq('doctor_id', doctorId)` |
+| Upload profile image                  | `supabase.storage.from('avatars').upload(path, file)`                     |
+| Get profile image URL                 | `supabase.storage.from('avatars').getPublicUrl(path)`                     |
 
-### User Profile
-| Method | Endpoint                     | Description                  | Auth |
-| :----- | :--------------------------- | :--------------------------- | :--- |
-| GET    | `/api/users/profile`         | Get full profile             | ✅    |
-| PUT    | `/api/users/profile`         | Update profile               | ✅    |
-| GET    | `/api/users/medical-history` | Get medical history          | ✅    |
-| POST   | `/api/users/medical-history` | Add medical history entry    | ✅    |
-| GET    | `/api/users/diagnosis-history` | Get past diagnoses         | ✅    |
+### Edge Functions
+
+| Function               | Endpoint                                 | Description                           |
+| :---------------------- | :--------------------------------------- | :------------------------------------ |
+| `predict-disease`       | `supabase.functions.invoke('predict-disease', { body: { symptom_ids } })` | Submit symptoms → get predictions |
+| `send-notification`     | `supabase.functions.invoke('send-notification', { body: { ... } })`       | Dispatch push notifications       |
+
+### Realtime Subscriptions
+
+```typescript
+// Subscribe to appointment status changes
+supabase
+  .channel('appointments')
+  .on('postgres_changes', {
+    event: 'UPDATE',
+    schema: 'public',
+    table: 'appointments',
+    filter: `patient_id=eq.${userId}`,
+  }, (payload) => {
+    // Handle real-time update
+  })
+  .subscribe();
+```
 
 ---
 
-## Environment Variables
+## Environment Variables / Configuration
 
-### Backend `.env`
-```env
-# Server
-PORT=5000
-NODE_ENV=development
+### Supabase Project Config (`Frontend/constants/config.ts`)
 
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=mediguide_db
-DB_USER=postgres
-DB_PASSWORD=your_password
-
-# JWT
-JWT_SECRET=your_jwt_secret_key_here
-JWT_EXPIRES_IN=7d
-
-# Email (for OTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
+```typescript
+export const SUPABASE_URL = 'https://your-project-ref.supabase.co';
+export const SUPABASE_ANON_KEY = 'your-anon-key-here';
 ```
 
-### Frontend `constants/config.ts`
+### Supabase Client Init (`Frontend/lib/supabase.ts`)
+
 ```typescript
-export const API_BASE_URL = 'http://10.0.2.2:5000/api'; // Android emulator
-// export const API_BASE_URL = 'http://localhost:5000/api'; // iOS simulator
+import 'react-native-url-polyfill/auto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../constants/config';
+import type { Database } from '../types/database.types';
+
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
+```
+
+### Supabase Edge Function Environment (set via Supabase Dashboard or CLI)
+
+```env
+# Set via: supabase secrets set KEY=VALUE
+EXPO_PUSH_ACCESS_TOKEN=your_expo_push_token
 ```
 
 ---
@@ -357,22 +365,39 @@ export const API_BASE_URL = 'http://10.0.2.2:5000/api'; // Android emulator
 
 ### Prerequisites
 - Node.js v18+
-- PostgreSQL 15+
+- Supabase CLI (`npm install -g supabase`)
 - Expo CLI (`npm install -g expo-cli`)
 - Android Studio / Xcode (for emulators)
+- Supabase account & project (https://supabase.com)
 
-### Backend Setup
+### Supabase Setup
+
 ```bash
-cd Backend
-npm install
-# Create .env file with the variables above
-npx sequelize-cli db:create
-npx sequelize-cli db:migrate
-npx sequelize-cli db:seed:all
-npm run dev
+# Login to Supabase CLI
+supabase login
+
+# Link to your remote project
+supabase link --project-ref your-project-ref
+
+# Run migrations against remote database
+supabase db push
+
+# Or run locally with Docker
+supabase start
+
+# Seed the database
+psql -h localhost -p 54322 -U postgres -d postgres -f supabase/seed.sql
+
+# Generate TypeScript types from your database schema
+supabase gen types typescript --linked > Frontend/types/database.types.ts
+
+# Deploy Edge Functions
+supabase functions deploy predict-disease
+supabase functions deploy send-notification
 ```
 
 ### Frontend Setup
+
 ```bash
 cd Frontend
 npm install
@@ -383,11 +408,13 @@ npx expo start
 
 ## User Roles
 
-| Role       | Description                                        |
-| :--------- | :------------------------------------------------- |
-| **Patient** | Default role. Can check symptoms, view predictions, book doctors |
-| **Doctor**  | Can manage profile, view/manage appointments, see patient summaries |
-| **Admin**   | Can manage all users, doctors, symptoms, diseases (future) |
+| Role        | Description                                                              |
+| :---------- | :----------------------------------------------------------------------- |
+| **Patient** | Default role. Can check symptoms, view predictions, book doctors          |
+| **Doctor**  | Can manage profile, view/manage appointments, see patient summaries       |
+| **Admin**   | Can manage all users, doctors, symptoms, diseases (via Supabase Dashboard or admin RLS policies) |
+
+> **Role enforcement**: User roles are stored in the `profiles.role` column and enforced via Supabase RLS policies. The `auth.uid()` function maps authenticated users to their profile row. Admin operations can also be done directly in the Supabase Dashboard.
 
 ---
 
@@ -415,8 +442,12 @@ npx expo start
 
 ## Key Development Patterns
 
-1. **Controller → Service → Model**: All business logic lives in services, controllers only handle req/res.
-2. **JWT Auth Middleware**: Applied to all protected routes via `authMiddleware.ts`.
-3. **Context Providers**: `AuthContext` wraps the app for auth state; `HealthContext` for symptom/prediction state.
-4. **Error Handling**: Global error handler middleware catches all errors and returns standardized JSON responses.
-5. **Input Validation**: Use `express-validator` for request body/params validation.
+1. **Direct DB Queries + RLS**: The app queries Supabase directly using the JS client. RLS policies enforce authorization — no custom backend middleware needed.
+2. **Supabase Auth Integration**: `AuthContext` wraps the app with `onAuthStateChange` listener. Auth state automatically manages session tokens, refresh, and persistence via AsyncStorage.
+3. **Service Layer**: Each domain (symptoms, doctors, appointments) has a dedicated service file that wraps Supabase client calls, keeping components clean.
+4. **TypeScript Types from DB**: Run `supabase gen types typescript` to auto-generate type-safe database types. All service functions use these types.
+5. **Edge Functions for Business Logic**: Complex logic (disease prediction, notification dispatch) lives in Supabase Edge Functions (Deno/TypeScript), keeping the client lightweight.
+6. **Realtime for Live Updates**: Appointment status changes and doctor-patient chat use Supabase Realtime Postgres Changes subscriptions.
+7. **Storage for Files**: Profile images and medical documents are stored in Supabase Storage buckets with appropriate access policies.
+8. **Error Handling**: Supabase client returns `{ data, error }` — all service functions check and throw/handle errors consistently.
+9. **Context Providers**: `AuthContext` for auth state; `HealthContext` for symptom/prediction state.
