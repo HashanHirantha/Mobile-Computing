@@ -6,6 +6,9 @@ export const colors = {
   accent: '#FF6B6B',
   background: '#F5F7FA',
   surface: '#FFFFFF',
+  surfaceAlt: '#F3F4F6',
+  authCardBg: '#CDE7FA',
+  black: '#1A1A1A',
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   border: '#E5E7EB',
@@ -27,6 +30,12 @@ export const typography = {
     fontSize: 28,
     fontWeight: '700' as const,
     lineHeight: 34,
+  },
+  h1Serif: {
+    fontSize: 36,
+    fontFamily: 'serif',
+    fontWeight: '700' as const,
+    lineHeight: 42,
   },
   h2: {
     fontSize: 20,

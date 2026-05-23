@@ -1,30 +1,35 @@
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import { colors, typography, spacing } from '../../constants/theme';
 
-type Variant = 'primary' | 'outline' | 'danger';
+type Variant = 'primary' | 'outline' | 'danger' | 'black';
+type Shape = 'default' | 'pill';
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
   variant?: Variant;
+  shape?: Shape;
   loading?: boolean;
   disabled?: boolean;
   style?: ViewStyle;
 }
 
-export function Button({ title, onPress, variant = 'primary', loading = false, disabled = false, style }: ButtonProps) {
+export function Button({ title, onPress, variant = 'primary', shape = 'default', loading = false, disabled = false, style }: ButtonProps) {
   const containerStyle = [
     styles.base,
+    shape === 'pill' && styles.pill,
     variant === 'outline' && styles.outline,
     variant === 'danger' && styles.danger,
+    variant === 'black' && styles.black,
     (disabled || loading) && styles.disabled,
     style,
   ];
 
-  const textStyle: TextStyle[] = [
+  const textStyle = [
     styles.text,
     variant === 'outline' && styles.textOutline,
     variant === 'danger' && styles.textDanger,
+    variant === 'black' && styles.textBlack,
   ];
 
   return (
@@ -52,6 +57,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  pill: {
+    borderRadius: 9999,
+  },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1.5,
@@ -60,8 +68,12 @@ const styles = StyleSheet.create({
   danger: {
     backgroundColor: colors.accent,
   },
+  black: {
+    backgroundColor: colors.black,
+  },
   disabled: { opacity: 0.5 },
   text: { ...typography.body, color: '#fff', fontWeight: '700' },
   textOutline: { color: colors.primary },
   textDanger: { color: '#fff' },
+  textBlack: { color: '#fff' },
 });

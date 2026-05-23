@@ -1,21 +1,28 @@
-import { View, Text, TextInput, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TextInputProps, ViewStyle, StyleProp } from 'react-native';
 import { colors, typography, spacing } from '../../constants/theme';
+import { Feather } from '@expo/vector-icons';
 
-interface InputProps extends TextInputProps {
+interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   error?: string;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  leftIcon?: keyof typeof Feather.glyphMap;
 }
 
-export function Input({ label, error, style, ...props }: InputProps) {
+export function Input({ label, error, style, leftIcon, ...props }: InputProps) {
   return (
     <View style={[styles.container, style]}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-      <TextInput
-        style={[styles.input, error ? styles.inputError : null]}
-        placeholderTextColor={colors.textSecondary}
-        {...props}
-      />
+      {label ? <Text style={styles.label}>{label.toUpperCase()}</Text> : null}
+      <View style={[styles.inputContainer, error ? styles.inputError : null]}>
+        {leftIcon ? (
+          <Feather name={leftIcon} size={20} color={colors.textSecondary} style={styles.icon} />
+        ) : null}
+        <TextInput
+          style={styles.input}
+          placeholderTextColor={colors.textSecondary}
+          {...props}
+        />
+      </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
   );
@@ -23,13 +30,21 @@ export function Input({ label, error, style, ...props }: InputProps) {
 
 const styles = StyleSheet.create({
   container: { marginBottom: spacing.md },
-  label: { ...typography.caption, color: colors.textPrimary, fontWeight: '600', marginBottom: spacing.xs },
-  input: {
+  label: { ...typography.caption, color: colors.textPrimary, fontWeight: '700', marginBottom: spacing.xs, letterSpacing: 0.5 },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'transparent',
     paddingHorizontal: spacing.md,
+  },
+  icon: {
+    marginRight: spacing.sm,
+  },
+  input: {
+    flex: 1,
     paddingVertical: spacing.md,
     color: colors.textPrimary,
     ...typography.body,
