@@ -20,6 +20,9 @@ CREATE POLICY "profiles_select_own" ON public.profiles
 CREATE POLICY "profiles_update_own" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
+CREATE POLICY "profiles_insert_own" ON public.profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
 -- Allow reading basic info for doctor discovery
 CREATE POLICY "profiles_select_public_for_doctors" ON public.profiles
   FOR SELECT USING (
@@ -104,3 +107,9 @@ CREATE POLICY "diagnosis_history_select_own" ON public.diagnosis_history
 
 CREATE POLICY "diagnosis_history_insert_own" ON public.diagnosis_history
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "diagnosis_history_update_own" ON public.diagnosis_history
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "diagnosis_history_delete_own" ON public.diagnosis_history
+  FOR DELETE USING (auth.uid() = user_id);
