@@ -1,110 +1,190 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, Image } from 'react-native';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
-import { Card } from '../../components/ui/Card';
-import { colors, typography, spacing } from '../../constants/theme';
 
 export default function HomeScreen() {
-  const { user, profile } = useAuth();
-
-  const quickActions = [
-    { id: 'check', label: 'Check Symptoms', icon: '🩺', route: '/(tabs)/check', color: colors.primary },
-    { id: 'doctors', label: 'Find Doctors', icon: '👨‍⚕️', route: '/(tabs)/doctors', color: colors.secondary },
-    { id: 'history', label: 'My History', icon: '📋', route: '/(tabs)/history', color: '#FF9500' },
-    { id: 'profile', label: 'My Profile', icon: '👤', route: '/(tabs)/profile', color: '#AF52DE' },
-  ];
+  const { profile } = useAuth();
+  
+  // Use profile name if available, otherwise fallback to "Alex" to match the mockup
+  const firstName = profile?.first_name || 'Alex';
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>
-            Hello, {profile?.first_name ?? 'there'} 👋
-          </Text>
-          <Text style={styles.subGreeting}>How are you feeling today?</Text>
-        </View>
-      </View>
-
-      {/* Emergency Banner */}
-      <View style={styles.emergencyBanner}>
-        <Text style={styles.emergencyIcon}>🚨</Text>
-        <View style={styles.emergencyText}>
-          <Text style={styles.emergencyTitle}>Emergency?</Text>
-          <Text style={styles.emergencySubtitle}>Call 1990 (Sri Lanka Emergency)</Text>
-        </View>
-      </View>
-
-      {/* Quick Actions */}
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
-      <View style={styles.grid}>
-        {quickActions.map((action) => (
-          <TouchableOpacity
-            key={action.id}
-            style={[styles.actionCard, { borderLeftColor: action.color }]}
-            onPress={() => router.push(action.route as any)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.actionIcon}>{action.icon}</Text>
-            <Text style={styles.actionLabel}>{action.label}</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
+            <Feather name="arrow-left" size={24} color="#000" />
           </TouchableOpacity>
-        ))}
-      </View>
+          <Text style={styles.headerTitle}>MediGuide</Text>
+          <Image 
+            source={{ uri: 'https://i.pravatar.cc/150?img=11' }} 
+            style={styles.avatar} 
+          />
+        </View>
 
-      {/* Disclaimer */}
-      <View style={styles.disclaimer}>
-        <Text style={styles.disclaimerText}>
-          ⚠️ MediGuide is a decision-support tool and does NOT replace professional
-          medical advice. Always consult a licensed healthcare provider.
-        </Text>
-      </View>
-    </ScrollView>
+        {/* Greeting */}
+        <Text style={styles.greetingTitle}>Good Morning, {firstName}</Text>
+        <Text style={styles.greetingSubtitle}>Your heart vitality is at 94% today.</Text>
+
+        {/* Search */}
+        <View style={styles.searchContainer}>
+          <Feather name="search" size={20} color="#88B0C8" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search doctors or programs..."
+            placeholderTextColor="#88B0C8"
+          />
+        </View>
+
+        {/* Card: Disease Prediction */}
+        <TouchableOpacity 
+          style={styles.card} 
+          activeOpacity={0.8} 
+          onPress={() => router.push('/(tabs)/check')}
+        >
+          <MaterialCommunityIcons 
+            name="file-document-edit-outline" 
+            size={32} 
+            color="#2E4A62" 
+            style={styles.cardIcon} 
+          />
+          <Text style={styles.cardTitle}>Disease{'\n'}Prediction</Text>
+          <Text style={styles.cardSubtitle}>AI ANALYSIS</Text>
+        </TouchableOpacity>
+
+        {/* Card: Book a Doctor */}
+        <TouchableOpacity 
+          style={styles.card} 
+          activeOpacity={0.8} 
+          onPress={() => router.push('/(tabs)/doctors')}
+        >
+          <MaterialCommunityIcons 
+            name="medical-bag" 
+            size={32} 
+            color="#2E4A62" 
+            style={styles.cardIcon} 
+          />
+          <Text style={styles.cardTitle}>Book a Doctor</Text>
+          <Text style={styles.cardSubtitle}>24/7 AVAILABILITY</Text>
+        </TouchableOpacity>
+
+      </ScrollView>
+
+      {/* FAB */}
+      <TouchableOpacity style={styles.fab}>
+        <Feather name="plus" size={28} color="#FFF" />
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg },
-  header: { marginBottom: spacing.xl },
-  greeting: { ...typography.h1, color: colors.textPrimary },
-  subGreeting: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
-  emergencyBanner: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 24,
+    paddingBottom: 100, // Space for FAB
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  headerIcon: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  greetingTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    color: '#1A1A1A',
+    marginBottom: 6,
+  },
+  greetingSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 30,
+  },
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF0F0',
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    gap: spacing.sm,
+    backgroundColor: '#E6F4FE',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    height: 52,
+    marginBottom: 30,
   },
-  emergencyIcon: { fontSize: 24 },
-  emergencyText: {},
-  emergencyTitle: { ...typography.body, color: colors.accent, fontWeight: '700' },
-  emergencySubtitle: { ...typography.caption, color: colors.textSecondary },
-  sectionTitle: { ...typography.h2, color: colors.textPrimary, marginBottom: spacing.md },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginBottom: spacing.xl },
-  actionCard: {
-    width: '47%',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    borderLeftWidth: 4,
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#000',
+  },
+  card: {
+    backgroundColor: '#C8E8FE',
+    borderRadius: 16,
+    padding: 24,
+    minHeight: 180,
+    justifyContent: 'flex-start',
+    marginBottom: 20,
+  },
+  cardIcon: {
+    marginBottom: 30,
+  },
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    color: '#1A1A1A',
+    marginBottom: 6,
+    lineHeight: 28,
+  },
+  cardSubtitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#4A5B69',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#385F85',
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  actionIcon: { fontSize: 32, marginBottom: spacing.sm },
-  actionLabel: { ...typography.body, color: colors.textPrimary, fontWeight: '600' },
-  disclaimer: {
-    backgroundColor: '#FFF8E6',
-    borderRadius: 12,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: '#FFD60A',
-  },
-  disclaimerText: { ...typography.caption, color: '#7A5F00' },
 });
