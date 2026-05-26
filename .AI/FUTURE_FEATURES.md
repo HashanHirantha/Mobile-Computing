@@ -13,15 +13,15 @@ This document tracks all planned features, enhancements, and technical improveme
 > **Goal**: Build a working symptom checker with disease prediction and doctor listing using Supabase.
 
 ### 1.1 Supabase Project Setup
-- [ ] Create Supabase project and configure environment
-- [ ] Set up `supabase/` directory with CLI config (`config.toml`)
-- [ ] Create all SQL migration files for tables
-- [ ] Enable Row Level Security (RLS) on all tables
-- [ ] Write and apply RLS policies
-- [ ] Create database trigger for `profiles` table on auth signup
-- [ ] Seed symptoms, diseases, disease-symptom mappings, and doctor data
+- [x] Create Supabase project and configure environment
+- [x] Set up `supabase/` directory with CLI config (`config.toml`)
+- [x] Create all SQL migration files for tables
+- [x] Enable Row Level Security (RLS) on all tables
+- [x] Write and apply RLS policies (including `profiles_insert_own`, `diagnosis_history` update/delete)
+- [x] Create database trigger for `profiles` table on auth signup (with `DROP TRIGGER IF EXISTS` for idempotency)
+- [x] Seed symptoms, diseases, disease-symptom mappings, and doctor data
 - [ ] Generate TypeScript types (`supabase gen types typescript`)
-- [ ] Initialize Supabase JS client in Frontend (`lib/supabase.ts`)
+- [x] Initialize Supabase JS client in Frontend (`lib/supabase.ts`)
 
 ### 1.2 Authentication & User Management (Supabase Auth)
 - [ ] User registration with email & password via `supabase.auth.signUp()`
@@ -115,6 +115,11 @@ This document tracks all planned features, enhancements, and technical improveme
 - [ ] Pull-to-refresh on all lists
 - [ ] Animated transitions between screens
 - [ ] Haptic feedback on actions
+
+### 2.7 UI Redesign (Mockup-Based) ✅ DONE
+- [x] Home screen redesigned — greeting, search bar, Disease Prediction card, Book a Doctor card, FAB button
+- [x] Symptom Checker (check.tsx) redesigned — step progress circle, add symptom search, common observation chips, duration tracker, AI prediction insights with percentages
+- [x] Settings/Profile screen (profile.tsx) redesigned — profile card with avatar, General section (Profile Settings, Notifications, Security), Preference section (Language, Help/Support), Sign Out button
 
 ---
 

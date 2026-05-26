@@ -20,7 +20,7 @@
 | **Storage**         | Supabase Storage (profile images, medical docs)       |
 | **Edge Functions**  | Supabase Edge Functions (Deno/TypeScript)             |
 | **State Management**| React Context API + AsyncStorage                     |
-| **Navigation**      | React Navigation v6 (Stack + Bottom Tabs)            |
+| **Navigation**      | Expo Router v6 (file-based routing, Stack + Bottom Tabs) |
 | **HTTP Client**     | Supabase JS Client (`@supabase/supabase-js`)         |
 | **Styling**         | React Native StyleSheet + Custom Theme System        |
 | **Push Notifications** | Expo Notifications                                |
@@ -171,11 +171,11 @@ Mobile-Computing/
 │   │   │   ├── register.tsx
 │   │   │   └── forgot-password.tsx
 │   │   ├── (tabs)/
-│   │   │   ├── home.tsx          # Dashboard / Quick actions
-│   │   │   ├── check.tsx         # Symptom checker flow
+│   │   │   ├── home.tsx          # Dashboard with greeting, search, Disease Prediction & Book a Doctor cards, FAB
+│   │   │   ├── check.tsx         # Full symptom checker with step progress, symptom chips, duration, AI prediction insights
 │   │   │   ├── doctors.tsx       # Browse doctors
 │   │   │   ├── history.tsx       # Past diagnoses & appointments
-│   │   │   └── profile.tsx       # User profile & settings
+│   │   │   └── profile.tsx       # Settings screen (profile card, general settings, preferences, sign out)
 │   │   ├── symptoms/
 │   │   │   ├── select.tsx        # Symptom selection screen
 │   │   │   └── results.tsx       # Disease prediction results
@@ -443,11 +443,12 @@ npx expo start
 ## Key Development Patterns
 
 1. **Direct DB Queries + RLS**: The app queries Supabase directly using the JS client. RLS policies enforce authorization — no custom backend middleware needed.
-2. **Supabase Auth Integration**: `AuthContext` wraps the app with `onAuthStateChange` listener. Auth state automatically manages session tokens, refresh, and persistence via AsyncStorage.
-3. **Service Layer**: Each domain (symptoms, doctors, appointments) has a dedicated service file that wraps Supabase client calls, keeping components clean.
-4. **TypeScript Types from DB**: Run `supabase gen types typescript` to auto-generate type-safe database types. All service functions use these types.
-5. **Edge Functions for Business Logic**: Complex logic (disease prediction, notification dispatch) lives in Supabase Edge Functions (Deno/TypeScript), keeping the client lightweight.
-6. **Realtime for Live Updates**: Appointment status changes and doctor-patient chat use Supabase Realtime Postgres Changes subscriptions.
-7. **Storage for Files**: Profile images and medical documents are stored in Supabase Storage buckets with appropriate access policies.
-8. **Error Handling**: Supabase client returns `{ data, error }` — all service functions check and throw/handle errors consistently.
-9. **Context Providers**: `AuthContext` for auth state; `HealthContext` for symptom/prediction state.
+2. **Supabase Auth Integration**: `AuthContext` wraps the app with `onAuthStateChange` listener. Auth state automatically manages session tokens, refresh, and persistence via AsyncStorage. The `on_auth_user_created` trigger auto-creates a profile row on signup (see [DATABASE_SCHEMA.md](file:///e:/Mobile-Computing/.AI/DATABASE_SCHEMA.md) for details).
+3. **Idempotent Triggers**: All `CREATE TRIGGER` statements are preceded by `DROP TRIGGER IF EXISTS` to prevent "already exists" errors when migrations are re-run.
+4. **Service Layer**: Each domain (symptoms, doctors, appointments) has a dedicated service file that wraps Supabase client calls, keeping components clean.
+5. **TypeScript Types from DB**: Run `supabase gen types typescript` to auto-generate type-safe database types. All service functions use these types.
+6. **Edge Functions for Business Logic**: Complex logic (disease prediction, notification dispatch) lives in Supabase Edge Functions (Deno/TypeScript), keeping the client lightweight.
+7. **Realtime for Live Updates**: Appointment status changes and doctor-patient chat use Supabase Realtime Postgres Changes subscriptions.
+8. **Storage for Files**: Profile images and medical documents are stored in Supabase Storage buckets with appropriate access policies.
+9. **Error Handling**: Supabase client returns `{ data, error }` — all service functions check and throw/handle errors consistently.
+10. **Context Providers**: `AuthContext` for auth state; `HealthContext` for symptom/prediction state.

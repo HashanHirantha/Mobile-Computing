@@ -101,18 +101,22 @@ Extends `auth.users` with app-specific user data. **Created automatically** via 
 
 **Trigger**: `on_auth_user_created` — automatically creates a `profiles` row when a user signs up.
 
+> **Note**: All triggers use `DROP TRIGGER IF EXISTS` before `CREATE TRIGGER` to prevent "already exists" errors on re-runs.
+
 ```sql
 -- Trigger function
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, role)
-  VALUES (NEW.id, NEW.email, 'patient');
+  VALUES (NEW.id, NEW.email, 'patient')
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger
+-- Trigger (idempotent)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
@@ -120,11 +124,12 @@ CREATE TRIGGER on_auth_user_created
 ```
 
 **RLS Policies**:
-| Policy Name           | Operation    | Rule                                         |
-| :-------------------- | :----------- | :------------------------------------------- |
-| `profiles_select_own` | SELECT       | `auth.uid() = id`                            |
-| `profiles_update_own` | UPDATE       | `auth.uid() = id`                            |
-| `profiles_select_public` | SELECT    | `true` (allow reading basic doctor profiles) |
+| Policy Name                          | Operation    | Rule                                                      |
+| :----------------------------------- | :----------- | :-------------------------------------------------------- |
+| `profiles_select_own`                | SELECT       | `auth.uid() = id`                                         |
+| `profiles_update_own`                | UPDATE       | `auth.uid() = id`                                         |
+| `profiles_insert_own`                | INSERT       | `auth.uid() = id`                                         |
+| `profiles_select_public_for_doctors` | SELECT       | `role IN ('doctor', 'admin') OR auth.uid() = id`          |
 
 ---
 
@@ -371,6 +376,8 @@ Logs of all symptom checks and predictions made by users.
 | :-------------------------------- | :-------- | :---------------------- |
 | `diagnosis_history_select_own`    | SELECT    | `auth.uid() = user_id` |
 | `diagnosis_history_insert_own`    | INSERT    | `auth.uid() = user_id` |
+| `diagnosis_history_update_own`    | UPDATE    | `auth.uid() = user_id` |
+| `diagnosis_history_delete_own`    | DELETE    | `auth.uid() = user_id` |
 
 **`all_predictions` JSONB format:**
 ```json
@@ -458,13 +465,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply to all tables with updated_at
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+-- Apply to all tables with updated_at (idempotent with DROP IF EXISTS)
+DROP TRIGGER IF EXISTS set_profiles_updated_at ON public.profiles;
+CREATE TRIGGER set_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+DROP TRIGGER IF EXISTS set_updated_at ON public.doctors;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON doctors FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+DROP TRIGGER IF EXISTS set_updated_at ON public.appointments;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON appointments FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+DROP TRIGGER IF EXISTS set_updated_at ON public.reviews;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON reviews FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+DROP TRIGGER IF EXISTS set_updated_at ON public.medical_history;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON medical_history FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+DROP TRIGGER IF EXISTS set_updated_at ON public.symptoms;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON symptoms FOR EACH ROW EXECUTE FUNCTION update_timestamp();
+DROP TRIGGER IF EXISTS set_updated_at ON public.diseases;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON diseases FOR EACH ROW EXECUTE FUNCTION update_timestamp();
 ```
 
