@@ -13,9 +13,9 @@ export default function TabsLayout() {
           backgroundColor: '#CDE7FA', // light blue background
           borderTopWidth: 0,
           elevation: 0,
-          height: 70,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
+          height: 80,
+          borderTopLeftRadius: 15,
+          borderTopRightRadius: 15,
           position: 'absolute', // To make the rounded corners look good against white background
         },
         tabBarActiveTintColor: '#111827',

@@ -8,7 +8,7 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { colors, typography, spacing } from '../../constants/theme';
 import { Avatar } from '../../components/ui/Avatar';
 import { Badge } from '../../components/ui/Badge';
-
+import { TopBar } from '../../components/TopBar';
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9500',
   confirmed: colors.secondary,
@@ -63,19 +63,7 @@ export default function HistoryScreen() {
     ]);
   };
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color={colors.black} />
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>Medi Guide</Text>
-      <Avatar 
-        uri="https://i.pravatar.cc/150?img=47" 
-        name="User" 
-        size={36} 
-      />
-    </View>
-  );
+
 
   const renderTitle = () => (
     <View style={styles.titleContainer}>
@@ -176,7 +164,7 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {renderHeader()}
+      <TopBar />
       
       <FlatList
         ListHeaderComponent={

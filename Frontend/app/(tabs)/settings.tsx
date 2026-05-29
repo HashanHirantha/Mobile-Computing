@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image, Alert } from 'react-native';
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
+import { TopBar } from '../../components/TopBar';
 
 export default function SettingsScreen() {
   const { user, profile, signOut } = useAuth();
@@ -20,19 +20,8 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <TopBar />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
-            <Feather name="arrow-left" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Settings</Text>
-          <Image 
-            source={{ uri: profile?.profile_image || 'https://i.pravatar.cc/150?img=11' }} 
-            style={styles.smallAvatar} 
-          />
-        </View>
 
         {/* Profile Card */}
         <View style={styles.profileCard}>

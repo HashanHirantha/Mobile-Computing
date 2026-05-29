@@ -6,7 +6,7 @@ import { useDoctors } from '../../hooks/useDoctors';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { colors, typography, spacing, radius } from '../../constants/theme';
 import { Avatar } from '../../components/ui/Avatar';
-
+import { TopBar } from '../../components/TopBar';
 const SPECIALTIES = ['All Doctors', 'Cardiologist', 'Neurologist', 'General Medicine'];
 
 export default function DoctorsScreen() {
@@ -17,19 +17,7 @@ export default function DoctorsScreen() {
     fetchDoctors(activeSpecialty === 'All Doctors' ? undefined : activeSpecialty);
   }, [activeSpecialty]);
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color={colors.black} />
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>Medi Guide</Text>
-      <Avatar 
-        uri="https://i.pravatar.cc/150?img=47" 
-        name="User" 
-        size={36} 
-      />
-    </View>
-  );
+
 
   const renderTitle = () => (
     <View style={styles.titleContainer}>
@@ -141,7 +129,7 @@ export default function DoctorsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {renderHeader()}
+      <TopBar />
       
       <FlatList
         ListHeaderComponent={

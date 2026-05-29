@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAr
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
-
+import { TopBar } from '../../components/TopBar';
 export default function HomeScreen() {
   const { profile } = useAuth();
   
@@ -12,20 +12,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <TopBar />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
-            <Feather name="arrow-left" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>MediGuide</Text>
-          <Image 
-            source={{ uri: 'https://i.pravatar.cc/150?img=11' }} 
-            style={styles.avatar} 
-          />
-        </View>
-
         {/* Greeting */}
         <Text style={styles.greetingTitle}>Good Morning, {firstName}</Text>
         <Text style={styles.greetingSubtitle}>Your heart vitality is at 94% today.</Text>

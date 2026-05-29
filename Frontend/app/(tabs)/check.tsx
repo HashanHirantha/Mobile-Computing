@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-
+import { TopBar } from '../../components/TopBar';
 export default function SymptomCheckerScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -11,19 +11,9 @@ export default function SymptomCheckerScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <TopBar />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerIcon}>
-            <Feather name="arrow-left" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>MediGuide</Text>
-          <View style={styles.headerAvatar}>
-            <MaterialCommunityIcons name="brain" size={16} color="#45F4D0" />
-          </View>
-        </View>
-
         {/* Huge Title */}
         <Text style={styles.mainTitle}>Symptom Checker</Text>
         <Text style={styles.subtitle}>
