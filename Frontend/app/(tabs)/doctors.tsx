@@ -9,6 +9,29 @@ import { Avatar } from '../../components/ui/Avatar';
 import { TopBar } from '../../components/TopBar';
 const SPECIALTIES = ['All Doctors', 'Cardiologist', 'Neurologist', 'General Medicine'];
 
+const MOCK_DOCTORS = [
+  {
+    id: '1',
+    profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' },
+    average_rating: 4.9,
+    specialty: 'Cardiologist',
+    experience_years: 15,
+  },
+  {
+    id: '2',
+    profiles: { first_name: 'Michael', last_name: 'Chen', profile_image: 'https://i.pravatar.cc/150?img=11' },
+    average_rating: 4.8,
+    specialty: 'Neurologist',
+    experience_years: 12,
+  },
+  {
+    id: '3',
+    profiles: { first_name: 'Emily', last_name: 'Davis', profile_image: 'https://i.pravatar.cc/150?img=32' },
+    average_rating: 4.7,
+    specialty: 'General Medicine',
+    experience_years: 8,
+  },
+];
 export default function DoctorsScreen() {
   const { doctors, loading, fetchDoctors } = useDoctors();
   const [activeSpecialty, setActiveSpecialty] = useState('All Doctors');
@@ -138,7 +161,7 @@ export default function DoctorsScreen() {
             {renderFilters()}
           </>
         }
-        data={doctors}
+        data={doctors.length > 0 ? doctors : MOCK_DOCTORS.filter(d => activeSpecialty === 'All Doctors' || d.specialty === activeSpecialty)}
         keyExtractor={(item) => item.id}
         renderItem={renderDoctor}
         contentContainerStyle={styles.listContainer}

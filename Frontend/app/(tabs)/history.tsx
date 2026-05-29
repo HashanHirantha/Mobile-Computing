@@ -17,6 +17,44 @@ const STATUS_COLORS: Record<string, string> = {
   no_show: '#8E8E93',
 };
 
+const MOCK_APPOINTMENTS = [
+  {
+    id: '1',
+    appointment_date: '2026-05-30',
+    appointment_time: '14:30',
+    status: 'confirmed',
+    doctors: {
+      specialty: 'Cardiologist',
+      profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' }
+    }
+  },
+  {
+    id: '2',
+    appointment_date: '2026-05-15',
+    appointment_time: '09:00',
+    status: 'completed',
+    doctors: {
+      specialty: 'Neurologist',
+      profiles: { first_name: 'Michael', last_name: 'Chen', profile_image: 'https://i.pravatar.cc/150?img=11' }
+    }
+  }
+];
+
+const MOCK_DIAGNOSES = [
+  {
+    id: '1',
+    created_at: '2026-05-20T10:00:00Z',
+    confidence_score: 92,
+    diseases: { name: 'Arrhythmia', severity: 'moderate' }
+  },
+  {
+    id: '2',
+    created_at: '2026-04-10T14:30:00Z',
+    confidence_score: 85,
+    diseases: { name: 'Hypertension', severity: 'mild' }
+  }
+];
+
 export default function HistoryScreen() {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -173,7 +211,7 @@ export default function HistoryScreen() {
             {renderTabs()}
           </>
         }
-        data={activeTab === 'appointments' ? appointments : diagnosisHistory}
+        data={activeTab === 'appointments' ? (appointments.length > 0 ? appointments : MOCK_APPOINTMENTS) : (diagnosisHistory.length > 0 ? diagnosisHistory : MOCK_DIAGNOSES)}
         keyExtractor={(item) => item.id.toString()}
         renderItem={activeTab === 'appointments' ? renderAppointmentCard : renderDiagnosisCard}
         contentContainerStyle={styles.listContainer}
