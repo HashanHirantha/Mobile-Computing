@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
+  Modal,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Input } from '../../components/ui/Input';
@@ -39,6 +40,13 @@ export default function RegisterScreen() {
   const [weight, setWeight] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dobDate, setDobDate] = useState(new Date());
+  
+  const [showGenderPicker, setShowGenderPicker] = useState(false);
+  const genderOptions = [
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' },
+    { label: 'Other', value: 'other' },
+  ];
 
   const { signUp } = useAuth();
 
@@ -70,8 +78,8 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    if (!firstName || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields.');
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      setError('Please fill in all required fields.');
       return;
     }
     if (password !== confirmPassword) {
@@ -88,11 +96,9 @@ export default function RegisterScreen() {
     }
     setLoading(true);
     setError('');
-    // Combine first and last name if they split them, but design shows "FULL NAME".
-    // We'll just pass firstName as fullName for now, or split by space if user entered full name.
-    const names = firstName.split(' ');
-    const first = names[0];
-    const last = names.slice(1).join(' ');
+    
+    const first = firstName.trim();
+    const last = lastName.trim();
     
     let heightCm = parseFloat(height);
     let weightKg = parseFloat(weight);
@@ -166,13 +172,25 @@ export default function RegisterScreen() {
             <Text style={styles.avatarLabel}>Profile Photo (Optional)</Text>
           </View>
 
-          <Input 
-            label="Full Name" 
-            value={firstName} 
-            onChangeText={setFirstName} 
-            placeholder="John Doe" 
-            leftIcon="user"
-          />
+          <View style={styles.row}>
+            <Input 
+              label="First Name" 
+              value={firstName} 
+              onChangeText={setFirstName} 
+              placeholder="John" 
+              leftIcon="user"
+              style={styles.flexHalf}
+            />
+            <View style={styles.spacer} />
+            <Input 
+              label="Last Name" 
+              value={lastName} 
+              onChangeText={setLastName} 
+              placeholder="Doe" 
+              leftIcon="user"
+              style={styles.flexHalf}
+            />
+          </View>
           <Input
             label="Email Address"
             value={email}
@@ -190,8 +208,8 @@ export default function RegisterScreen() {
             placeholder="+1 234 567 8900"
             leftIcon="phone"
           />
-          <TouchableOpacity onPress={() => setShowDatePicker(true)} activeOpacity={1}>
-            <View pointerEvents="none">
+          <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ width: '100%' }}>
+            <View pointerEvents="box-only" style={{ width: '100%' }}>
               <Input
                 label="Date of Birth"
                 value={dateOfBirth}
@@ -211,24 +229,44 @@ export default function RegisterScreen() {
             />
           )}
           
-          <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>GENDER</Text>
-            <View style={styles.pickerWrapper}>
-              <Feather name="users" size={20} color={colors.textSecondary} style={styles.icon} />
-              <Picker
-                selectedValue={gender}
-                onValueChange={(itemValue) => setGender(itemValue)}
-                style={styles.picker}
-                dropdownIconColor={colors.textPrimary}
-                mode="dropdown"
-              >
-                <Picker.Item label="Select Gender" value="" color={colors.textSecondary} />
-                <Picker.Item label="Male" value="male" color={colors.textPrimary} />
-                <Picker.Item label="Female" value="female" color={colors.textPrimary} />
-                <Picker.Item label="Other" value="other" color={colors.textPrimary} />
-              </Picker>
+          <TouchableOpacity onPress={() => setShowGenderPicker(true)} style={{ width: '100%' }}>
+            <View pointerEvents="box-only" style={{ width: '100%' }}>
+              <Input
+                label="Gender"
+                value={gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : ''}
+                editable={false}
+                placeholder="Select Gender"
+                leftIcon="users"
+              />
             </View>
-          </View>
+          </TouchableOpacity>
+
+          <Modal visible={showGenderPicker} transparent animationType="slide">
+            <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowGenderPicker(false)} activeOpacity={1}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Select Gender</Text>
+                {genderOptions.map(option => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={styles.modalOption}
+                    onPress={() => {
+                      setGender(option.value);
+                      setShowGenderPicker(false);
+                    }}
+                  >
+                    <Text style={[
+                      styles.modalOptionText,
+                      gender === option.value && styles.modalOptionTextSelected
+                    ]}>
+                      {option.label}
+                    </Text>
+                    {gender === option.value && <Feather name="check" size={20} color={colors.primary} />}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableOpacity>
+          </Modal>
+
           <Input
             label="Blood Group"
             value={bloodGroup}
@@ -351,26 +389,50 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     marginBottom: spacing.xl,
   },
-  pickerContainer: { marginBottom: spacing.md },
-  pickerLabel: { ...typography.caption, color: colors.textPrimary, fontWeight: '700', marginBottom: spacing.xs, letterSpacing: 0.5 },
-  pickerWrapper: {
+  row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    paddingLeft: spacing.md,
-    height: 54, // Match Input component height exactly
+    width: '100%',
   },
-  icon: { marginRight: spacing.sm },
-  picker: {
+  flexHalf: {
     flex: 1,
+  },
+  spacer: {
+    width: spacing.md,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: spacing.lg,
+    paddingBottom: Platform.OS === 'ios' ? 40 : spacing.lg,
+  },
+  modalTitle: {
+    ...typography.h2,
     color: colors.textPrimary,
-    ...Platform.select({
-      ios: { marginVertical: spacing.sm },
-      android: { backgroundColor: 'transparent' },
-    }),
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  modalOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalOptionText: {
+    ...typography.body,
+    color: colors.textPrimary,
+    fontSize: 16,
+  },
+  modalOptionTextSelected: {
+    color: colors.primary,
+    fontWeight: '700',
   },
   avatarWrapper: {
     alignItems: 'center',

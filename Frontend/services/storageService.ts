@@ -4,12 +4,12 @@ import { supabase } from '../lib/supabase';
 /**
  * Pick an image from the device library and upload to Supabase Storage.
  * @param userId - The user's ID (used as folder prefix)
- * @param bucket - The storage bucket name ('avatars' or 'medical-docs')
+ * @param bucket - The storage bucket name ('patients' or 'medical-docs')
  * @returns The public URL of the uploaded image, or an error
  */
 export async function pickAndUploadImage(
   userId: string,
-  bucket: 'avatars' | 'medical-docs' = 'avatars'
+  bucket: 'patients' | 'medical-docs' = 'patients'
 ): Promise<{ url: string | null; error: string | null }> {
   // Request permissions
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();

@@ -86,12 +86,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const response = await fetch(meta.profileImageUri);
           const blob = await response.blob();
-          const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, blob, {
+          const { error: uploadError } = await supabase.storage.from('patients').upload(filePath, blob, {
             upsert: true,
             contentType: `image/${ext}`,
           });
           if (!uploadError) {
-            const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+            const { data: urlData } = supabase.storage.from('patients').getPublicUrl(filePath);
             profile_image = urlData.publicUrl;
           }
         } catch (e) {

@@ -406,7 +406,7 @@ Logs of all symptom checks and predictions made by users.
 
 | Bucket Name   | Public | Description                        | Access Policy                          |
 | :------------ | :----- | :--------------------------------- | :------------------------------------- |
-| `avatars`     | Yes    | User & doctor profile images       | Authenticated users can upload to their own path (`user_id/*`) |
+| `patients`    | Yes    | User & doctor profile images       | Authenticated users can upload to their own path (`user_id/*`) |
 | `medical-docs`| No     | Medical documents & reports        | Only the owning user can read/write    |
 
 ### Storage RLS Example
@@ -416,14 +416,14 @@ Logs of all symptom checks and predictions made by users.
 CREATE POLICY "users_upload_own_avatar"
 ON storage.objects FOR INSERT
 WITH CHECK (
-  bucket_id = 'avatars'
+  bucket_id = 'patients'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
 
 -- Allow public read for avatars
 CREATE POLICY "public_read_avatars"
 ON storage.objects FOR SELECT
-USING (bucket_id = 'avatars');
+USING (bucket_id = 'patients');
 ```
 
 ---
