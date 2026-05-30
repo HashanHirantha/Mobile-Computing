@@ -28,10 +28,16 @@ export default function SettingsScreen() {
         {/* Profile Card */}
         <View style={globalStyles.profileCard}>
           <View style={globalStyles.avatarContainer}>
-            <Image 
-              source={{ uri: profile?.profile_image || 'https://i.pravatar.cc/150?img=11' }} 
-              style={globalStyles.avatarLarge} 
-            />
+            {profile?.profile_image ? (
+              <Image 
+                source={{ uri: profile.profile_image }} 
+                style={globalStyles.avatarLarge} 
+              />
+            ) : (
+              <View style={[globalStyles.avatarLarge, { backgroundColor: '#E1E8ED', justifyContent: 'center', alignItems: 'center' }]}>
+                <Feather name="user" size={40} color="#88B0C8" />
+              </View>
+            )}
             <View style={globalStyles.editBadge}>
               <MaterialCommunityIcons name="pencil" size={12} color="#FFF" />
             </View>

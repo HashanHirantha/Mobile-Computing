@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { TopBar } from '../../components/TopBar';
 import { colors, typography, spacing } from '../../constants/theme';
@@ -39,8 +40,59 @@ export default function ProfileSettingsScreen() {
     }
   };
 
-  const handleImagePick = () => {
-    Alert.alert('Upload Photo', 'Image picker will open here.');
+  const handleImagePick = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets?.[0]) {
+      const uri = result.assets[0].uri;
+      await uploadProfileImage(uri);
+    }
+  };
+
+  const uploadProfileImage = async (uri: string) => {
+    if (!user) return;
+    try {
+      setSaving(true);
+      const ext = uri.split('.').pop() ?? 'jpg';
+      const filePath = `${user.id}/avatar.${ext}`;
+      
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      
+      const { error: uploadError } = await supabase.storage.from('patients').upload(filePath, blob, {
+        upsert: true,
+        contentType: `image/${ext}`,
+      });
+      
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('patients').getPublicUrl(filePath);
+      
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ profile_image: urlData.publicUrl })
+        .eq('id', user.id);
+        
+      if (updateError) throw updateError;
+      
+      await refreshProfile();
+      Alert.alert('Success', 'Profile photo updated successfully!');
+    } catch (e: any) {
+      Alert.alert('Upload Failed', e.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -52,10 +104,16 @@ export default function ProfileSettingsScreen() {
         
         <View style={globalStyles.profileCard}>
           <View style={globalStyles.avatarContainer}>
-            <Image 
-              source={{ uri: profile?.profile_image || 'https://i.pravatar.cc/150?img=11' }} 
-              style={globalStyles.avatarLarge} 
-            />
+            {profile?.profile_image ? (
+              <Image 
+                source={{ uri: profile.profile_image }} 
+                style={globalStyles.avatarLarge} 
+              />
+            ) : (
+              <View style={[globalStyles.avatarLarge, { backgroundColor: '#E1E8ED', justifyContent: 'center', alignItems: 'center' }]}>
+                <Feather name="user" size={40} color="#88B0C8" />
+              </View>
+            )}
             <TouchableOpacity style={globalStyles.editBadge} onPress={handleImagePick}>
               <Feather name="camera" size={14} color="#FFF" />
             </TouchableOpacity>
