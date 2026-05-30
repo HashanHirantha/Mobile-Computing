@@ -118,7 +118,7 @@ export default function DoctorsScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.bookButtonMain}>
+          <TouchableOpacity style={styles.bookButtonMain} onPress={() => router.push({ pathname: '/doctors/book', params: { doctorId: item.id } })}>
             <Text style={styles.bookButtonMainText}>Book Now</Text>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -143,7 +143,7 @@ export default function DoctorsScreen() {
             <Text style={styles.compactRatingText}>{item.average_rating?.toFixed(1) || '4.8'}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.bookButtonSmall}>
+        <TouchableOpacity style={styles.bookButtonSmall} onPress={() => router.push({ pathname: '/doctors/book', params: { doctorId: item.id } })}>
           <Text style={styles.bookButtonSmallText}>Book</Text>
         </TouchableOpacity>
       </TouchableOpacity>

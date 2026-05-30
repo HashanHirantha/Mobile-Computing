@@ -1,13 +1,31 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Avatar } from '../../components/ui/Avatar';
-import { Badge } from '../../components/ui/Badge';
-import { RatingStars } from '../../components/RatingStars';
-import { Button } from '../../components/ui/Button';
+import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { supabase } from '../../lib/supabase';
-import { colors, typography, spacing } from '../../constants/theme';
+import { TopBar } from '../../components/TopBar';
+
+const MOCK_DOCTOR = {
+  id: '1',
+  profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' },
+  average_rating: 4.9,
+  total_reviews: 127,
+  specialty: 'Cardiologist',
+  experience_years: 15,
+  qualification: 'MD, FACC',
+  hospital_name: 'City Heart Institute',
+  consultation_fee: 3500,
+  bio: 'Dr. Sarah Jenkins is a board-certified cardiologist with over 15 years of experience in interventional and preventive cardiology. She specializes in heart failure management, arrhythmia treatment, and cardiac rehabilitation programs.',
+  available_days: 'Mon, Wed, Fri',
+  available_from: '09:00',
+  available_to: '17:00',
+};
+
+const MOCK_REVIEWS = [
+  { id: '1', rating: 5, comment: 'Excellent doctor! Very thorough and caring. Explained everything clearly.', is_anonymous: false, profiles: { first_name: 'Alex', last_name: 'Morgan' } },
+  { id: '2', rating: 4, comment: 'Very professional and knowledgeable. Highly recommend.', is_anonymous: false, profiles: { first_name: 'Jordan', last_name: 'Lee' } },
+];
 
 export default function DoctorDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -33,89 +51,364 @@ export default function DoctorDetailScreen() {
         .order('created_at', { ascending: false })
         .limit(5),
     ]);
-    setDoctor(docRes.data);
-    setReviews(revRes.data ?? []);
+    setDoctor(docRes.data || MOCK_DOCTOR);
+    setReviews(revRes.data?.length ? revRes.data : MOCK_REVIEWS);
     setLoading(false);
   };
 
   if (loading) return <LoadingSpinner />;
-  if (!doctor) return <Text style={styles.error}>Doctor not found.</Text>;
 
-  const name = `Dr. ${doctor.profiles?.first_name} ${doctor.profiles?.last_name}`;
+  const doc = doctor || MOCK_DOCTOR;
+  const name = `Dr. ${doc.profiles?.first_name} ${doc.profiles?.last_name}`;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Profile Header */}
-      <View style={styles.profileHeader}>
-        <Avatar uri={doctor.profiles?.profile_image} name={name} size={72} />
-        <Text style={styles.name}>{name}</Text>
-        <Badge label={doctor.specialty} />
-        <RatingStars rating={doctor.average_rating} total={doctor.total_reviews} />
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <TopBar />
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      {/* Details */}
-      <View style={styles.card}>
-        {[
-          { label: 'Qualification', value: doctor.qualification },
-          { label: 'Experience', value: `${doctor.experience_years} years` },
-          { label: 'Hospital', value: doctor.hospital_name ?? 'N/A' },
-          { label: 'Consultation Fee', value: `LKR ${doctor.consultation_fee}` },
-          { label: 'Available Days', value: doctor.available_days ?? 'N/A' },
-          { label: 'Hours', value: doctor.available_from && doctor.available_to ? `${doctor.available_from} – ${doctor.available_to}` : 'N/A' },
-        ].map((item, idx, arr) => (
-          <View key={item.label} style={[styles.row, idx < arr.length - 1 && styles.rowBorder]}>
-            <Text style={styles.rowLabel}>{item.label}</Text>
-            <Text style={styles.rowValue}>{item.value}</Text>
+        {/* Doctor Profile Card */}
+        <View style={styles.profileCard}>
+          <Image
+            source={{ uri: doc.profiles?.profile_image || 'https://i.pravatar.cc/150?img=11' }}
+            style={styles.doctorImage}
+          />
+          <View style={styles.profileInfo}>
+            <Text style={styles.doctorName}>{name}</Text>
+            <View style={styles.specialtyBadge}>
+              <Text style={styles.specialtyText}>{doc.specialty?.toUpperCase() || 'CARDIOLOGIST'}</Text>
+            </View>
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={14} color="#F5A623" />
+              <Text style={styles.ratingText}>{doc.average_rating?.toFixed(1) || '4.9'}</Text>
+              <Text style={styles.reviewCount}>({doc.total_reviews || 127} reviews)</Text>
+            </View>
           </View>
-        ))}
-      </View>
+        </View>
 
-      {/* Bio */}
-      {doctor.bio ? (
-        <>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.bio}>{doctor.bio}</Text>
-        </>
-      ) : null}
+        {/* Stats Row */}
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <MaterialCommunityIcons name="clock-outline" size={20} color="#2E4A62" />
+            <Text style={styles.statValue}>{doc.experience_years || 15}+</Text>
+            <Text style={styles.statLabel}>Years Exp.</Text>
+          </View>
+          <View style={styles.statBox}>
+            <MaterialCommunityIcons name="account-group-outline" size={20} color="#2E4A62" />
+            <Text style={styles.statValue}>{doc.total_reviews || 127}</Text>
+            <Text style={styles.statLabel}>Patients</Text>
+          </View>
+          <View style={styles.statBox}>
+            <MaterialCommunityIcons name="star-outline" size={20} color="#2E4A62" />
+            <Text style={styles.statValue}>{doc.average_rating?.toFixed(1) || '4.9'}</Text>
+            <Text style={styles.statLabel}>Rating</Text>
+          </View>
+        </View>
 
-      {/* Reviews */}
-      {reviews.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Reviews</Text>
-          {reviews.map((r) => (
-            <View key={r.id} style={styles.reviewCard}>
-              <Text style={styles.reviewAuthor}>
-                {r.is_anonymous ? 'Anonymous' : `${r.profiles?.first_name} ${r.profiles?.last_name}`}
-              </Text>
-              <RatingStars rating={r.rating} />
-              {r.comment ? <Text style={styles.reviewComment}>{r.comment}</Text> : null}
+        {/* About Section */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionLabel}>ABOUT</Text>
+          <Text style={styles.aboutText}>
+            {doc.bio || `${name} is a highly experienced ${doc.specialty} dedicated to providing exceptional patient care.`}
+          </Text>
+        </View>
+
+        {/* Details Section */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionLabel}>DETAILS</Text>
+          {[
+            { icon: 'briefcase', label: 'Qualification', value: doc.qualification || 'MD, FACC' },
+            { icon: 'map-pin', label: 'Hospital', value: doc.hospital_name || 'City Heart Institute' },
+            { icon: 'dollar-sign', label: 'Consultation Fee', value: `LKR ${doc.consultation_fee || 3500}` },
+            { icon: 'calendar', label: 'Available Days', value: doc.available_days || 'Mon, Wed, Fri' },
+            { icon: 'clock', label: 'Working Hours', value: doc.available_from && doc.available_to ? `${doc.available_from} – ${doc.available_to}` : '09:00 – 17:00' },
+          ].map((item, idx, arr) => (
+            <View key={item.label}>
+              <View style={styles.detailRow}>
+                <View style={styles.detailIconContainer}>
+                  <Feather name={item.icon as any} size={16} color="#2E4A62" />
+                </View>
+                <View style={styles.detailTextContainer}>
+                  <Text style={styles.detailLabel}>{item.label}</Text>
+                  <Text style={styles.detailValue}>{item.value}</Text>
+                </View>
+              </View>
+              {idx < arr.length - 1 && <View style={styles.divider} />}
             </View>
           ))}
-        </>
-      )}
+        </View>
 
-      <Button
-        title="Book Appointment"
-        onPress={() => router.push({ pathname: '/doctors/book', params: { doctorId: id } })}
-      />
-    </ScrollView>
+        {/* Reviews Section */}
+        <View style={styles.sectionCard}>
+          <View style={styles.reviewsHeader}>
+            <Text style={styles.sectionLabel}>REVIEWS</Text>
+            <Text style={styles.seeAll}>See All</Text>
+          </View>
+          {reviews.map((r) => (
+            <View key={r.id} style={styles.reviewItem}>
+              <View style={styles.reviewTop}>
+                <Text style={styles.reviewAuthor}>
+                  {r.is_anonymous ? 'Anonymous' : `${r.profiles?.first_name} ${r.profiles?.last_name}`}
+                </Text>
+                <View style={styles.reviewRating}>
+                  {Array.from({ length: r.rating }, (_, i) => (
+                    <Ionicons key={i} name="star" size={12} color="#F5A623" />
+                  ))}
+                </View>
+              </View>
+              {r.comment && <Text style={styles.reviewComment}>{r.comment}</Text>}
+            </View>
+          ))}
+        </View>
+
+        {/* Bottom Padding */}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      {/* Fixed Book Now Button */}
+      <View style={styles.bookBarContainer}>
+        <View style={styles.bookBar}>
+          <View>
+            <Text style={styles.feeLabel}>CONSULTATION FEE</Text>
+            <Text style={styles.feeValue}>LKR {doc.consultation_fee || 3500}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.bookButton}
+            activeOpacity={0.8}
+            onPress={() => router.push({ pathname: '/doctors/book', params: { doctorId: id } })}
+          >
+            <Text style={styles.bookButtonText}>Book Now</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md },
-  profileHeader: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
-  name: { ...typography.h2, color: colors.textPrimary },
-  card: { backgroundColor: colors.surface, borderRadius: 12, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', padding: spacing.md },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  rowLabel: { ...typography.caption, color: colors.textSecondary },
-  rowValue: { ...typography.body, color: colors.textPrimary, fontWeight: '500', maxWidth: '60%', textAlign: 'right' },
-  sectionTitle: { ...typography.h2, color: colors.textPrimary },
-  bio: { ...typography.body, color: colors.textSecondary, lineHeight: 22 },
-  reviewCard: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  reviewAuthor: { ...typography.body, color: colors.textPrimary, fontWeight: '600' },
-  reviewComment: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
-  error: { ...typography.body, color: colors.accent, padding: spacing.lg },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 24,
+  },
+
+  // Profile Card
+  profileCard: {
+    backgroundColor: '#C8E8FE',
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  doctorImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 16,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.6)',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  doctorName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 6,
+  },
+  specialtyBadge: {
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  specialtyText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#4A5568',
+    letterSpacing: 0.5,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  reviewCount: {
+    fontSize: 12,
+    color: '#4A5568',
+  },
+
+  // Stats
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: '#C8E8FE',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    gap: 6,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  statLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#4A5568',
+    letterSpacing: 0.5,
+  },
+
+  // Section Card
+  sectionCard: {
+    backgroundColor: '#C8E8FE',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#2E4A62',
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  aboutText: {
+    fontSize: 14,
+    color: '#4A5568',
+    lineHeight: 22,
+  },
+
+  // Detail Rows
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  detailIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  detailTextContainer: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: '#4A5568',
+    marginBottom: 2,
+  },
+  detailValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    marginLeft: 50,
+  },
+
+  // Reviews
+  reviewsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  seeAll: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2E4A62',
+    marginBottom: 12,
+  },
+  reviewItem: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+  },
+  reviewTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  reviewAuthor: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  reviewRating: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  reviewComment: {
+    fontSize: 13,
+    color: '#4A5568',
+    lineHeight: 20,
+  },
+
+  // Book Bar
+  bookBarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingBottom: 30,
+    paddingTop: 12,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  bookBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  feeLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#4A5568',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  feeValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  bookButton: {
+    backgroundColor: '#111827',
+    paddingHorizontal: 40,
+    paddingVertical: 16,
+    borderRadius: 14,
+  },
+  bookButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });

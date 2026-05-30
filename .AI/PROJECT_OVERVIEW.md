@@ -171,11 +171,13 @@ Mobile-Computing/
 │   │   │   ├── register.tsx
 │   │   │   └── forgot-password.tsx
 │   │   ├── (tabs)/
+│   │   │   ├── _layout.tsx       # Bottom tab bar layout (6 tabs: Home, History, Check, Profile, Settings, Doctors)
 │   │   │   ├── home.tsx          # Dashboard with greeting, search, Disease Prediction & Book a Doctor cards, FAB
 │   │   │   ├── check.tsx         # Full symptom checker with step progress, symptom chips, duration, AI prediction insights
-│   │   │   ├── doctors.tsx       # Browse doctors
-│   │   │   ├── history.tsx       # Past diagnoses & appointments
-│   │   │   └── profile.tsx       # Settings screen (profile card, general settings, preferences, sign out)
+│   │   │   ├── doctors.tsx       # Browse doctors with featured + compact card layouts, mock data fallback
+│   │   │   ├── history.tsx       # Past appointments & diagnosis history with tab filters, mock data fallback
+│   │   │   ├── settings.tsx      # Settings screen (profile card, general settings, preferences, sign out)
+│   │   │   └── profile.tsx       # User profile screen
 │   │   ├── symptoms/
 │   │   │   ├── select.tsx        # Symptom selection screen
 │   │   │   └── results.tsx       # Disease prediction results
@@ -194,6 +196,7 @@ Mobile-Computing/
 │   │   │   ├── Badge.tsx
 │   │   │   ├── Avatar.tsx
 │   │   │   └── LoadingSpinner.tsx
+│   │   ├── TopBar.tsx            # Unified top navigation bar (← arrow, "MediGuide" title, profile avatar)
 │   │   ├── SymptomCard.tsx
 │   │   ├── DiseaseCard.tsx
 │   │   ├── DoctorCard.tsx
@@ -421,22 +424,39 @@ npx expo start
 ## Design System
 
 ### Color Palette
-| Token            | Value       | Usage                    |
-| :--------------- | :---------- | :----------------------- |
-| `primary`        | `#4A90D9`   | Primary actions, headers |
-| `primaryDark`    | `#2E6DB4`   | Active/pressed states    |
-| `secondary`      | `#34C759`   | Success, health positive |
-| `accent`         | `#FF6B6B`   | Alerts, emergency flags  |
-| `background`     | `#F5F7FA`   | Screen backgrounds       |
-| `surface`        | `#FFFFFF`   | Card surfaces            |
-| `textPrimary`    | `#1A1A2E`   | Headings, body text      |
-| `textSecondary`  | `#6B7280`   | Captions, hints          |
-| `border`         | `#E5E7EB`   | Dividers, card borders   |
+| Token              | Value       | Usage                                    |
+| :----------------- | :---------- | :--------------------------------------- |
+| `primary`          | `#4A90D9`   | Primary actions, headers                 |
+| `primaryDark`      | `#2E6DB4`   | Active/pressed states                    |
+| `secondary`        | `#34C759`   | Success, health positive                 |
+| `accent`           | `#FF6B6B`   | Alerts, emergency flags                  |
+| `background`       | `#FFFFFF`   | Screen backgrounds (white)               |
+| `surface`          | `#FFFFFF`   | Card surfaces                            |
+| `cardBg`           | `#C8E8FE`   | Card backgrounds (light blue)            |
+| `authCardBg`       | `#CDE7FA`   | Auth/alt card backgrounds                |
+| `darkButton`       | `#111827`   | Primary dark buttons, active filter chips|
+| `headerArrow`      | `#5C7C99`   | TopBar back arrow icon color             |
+| `tabBarBg`         | `#CDE7FA`   | Bottom tab bar background                |
+| `centerButtonBg`   | `#111827`   | Center (brain) tab button                |
+| `textPrimary`      | `#1A1A2E`   | Headings, body text                      |
+| `textSecondary`    | `#6B7280`   | Captions, hints                          |
+| `subtleText`       | `#4A5568`   | Descriptions, specialty labels           |
+| `border`           | `#E5E7EB`   | Dividers, card borders                   |
 
 ### Typography
-- **Headings**: Inter Bold (24–32px)
+- **Headings**: Inter Bold / Serif Bold (24–40px)
 - **Body**: Inter Regular (14–16px)
-- **Captions**: Inter Medium (12px)
+- **Captions**: Inter Medium (10–12px, letter-spacing 0.5–1.2)
+
+### UI Components
+
+| Component        | Description                                                                    |
+| :--------------- | :----------------------------------------------------------------------------- |
+| **Bottom Tabs**  | 6-tab layout: Home, History, Check (center brain FAB), Profile, Settings, Doctors |
+| **Cards**        | Light-blue (`#C8E8FE`) rounded cards with semi-transparent white inner elements|
+| **Filter Chips** | Pill-shaped specialty filters (dark active, light-blue inactive)               |
+| **Featured Card**| Large doctor card with image, rating badge, specialty, bio, stats, book button  |
+| **Compact Card** | Row-style card with circular avatar, details, and small action button           |
 
 ---
 
@@ -452,3 +472,5 @@ npx expo start
 8. **Storage for Files**: Profile images and medical documents are stored in Supabase Storage buckets with appropriate access policies.
 9. **Error Handling**: Supabase client returns `{ data, error }` — all service functions check and throw/handle errors consistently.
 10. **Context Providers**: `AuthContext` for auth state; `HealthContext` for symptom/prediction state.
+11. **Unified TopBar Component**: All tab screens use a shared `TopBar` component (`components/TopBar.tsx`) for consistent header styling — back arrow, centered "MediGuide" title, and profile avatar. The TopBar manages its own padding and sits outside ScrollView containers for a sticky-header effect.
+12. **Mock Data Fallback**: The `doctors.tsx` and `history.tsx` screens include hardcoded mock data arrays (`MOCK_DOCTORS`, `MOCK_APPOINTMENTS`, `MOCK_DIAGNOSES`) that are displayed when no real data is returned from Supabase, enabling UI development and demos without a live backend.

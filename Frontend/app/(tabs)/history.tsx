@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, SafeAreaView, Alert } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -63,27 +64,53 @@ export default function HistoryScreen() {
   const [activeTab, setActiveTab] = useState<'appointments' | 'diagnoses'>('appointments');
 
   useEffect(() => {
-    if (user) {
-      fetchHistory();
-    }
+    fetchHistory();
   }, [user]);
+
+  // Reload when screen comes into focus (e.g. after booking)
+  useFocusEffect(
+    useCallback(() => {
+      fetchHistory();
+    }, [user])
+  );
 
   const fetchHistory = async () => {
     setLoading(true);
-    const [apptRes, diagRes] = await Promise.all([
-      supabase
-        .from('appointments')
-        .select('*, doctors(*, profiles(first_name, last_name, profile_image))')
-        .eq('patient_id', user!.id)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('diagnosis_history')
-        .select('*, diseases(name, specialty, severity)')
-        .eq('user_id', user!.id)
-        .order('created_at', { ascending: false }),
-    ]);
-    setAppointments(apptRes.data ?? []);
-    setDiagnosisHistory(diagRes.data ?? []);
+
+    // Load locally-saved appointments from AsyncStorage
+    let localAppts: any[] = [];
+    try {
+      const stored = await AsyncStorage.getItem('local_appointments');
+      if (stored) localAppts = JSON.parse(stored);
+    } catch (e) {
+      // ignore
+    }
+
+    if (user) {
+      const [apptRes, diagRes] = await Promise.all([
+        supabase
+          .from('appointments')
+          .select('*, doctors(*, profiles(first_name, last_name, profile_image))')
+          .eq('patient_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('diagnosis_history')
+          .select('*, diseases(name, specialty, severity)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+      ]);
+
+      const supaAppts = apptRes.data ?? [];
+      // Merge: Supabase data first, then local-only (filter out duplicates)
+      const supaIds = new Set(supaAppts.map((a: any) => a.id));
+      const uniqueLocal = localAppts.filter((a: any) => !supaIds.has(a.id));
+      setAppointments([...supaAppts, ...uniqueLocal]);
+      setDiagnosisHistory(diagRes.data ?? []);
+    } else {
+      // No user — show only local appointments
+      setAppointments(localAppts);
+    }
+
     setLoading(false);
   };
 
@@ -94,7 +121,18 @@ export default function HistoryScreen() {
         text: 'Yes',
         style: 'destructive',
         onPress: async () => {
-          await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', appointmentId);
+          // If it's a local appointment, remove from AsyncStorage
+          if (appointmentId.startsWith('local-')) {
+            try {
+              const stored = await AsyncStorage.getItem('local_appointments');
+              if (stored) {
+                const localAppts = JSON.parse(stored).filter((a: any) => a.id !== appointmentId);
+                await AsyncStorage.setItem('local_appointments', JSON.stringify(localAppts));
+              }
+            } catch (e) {}
+          } else {
+            await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', appointmentId);
+          }
           fetchHistory();
         },
       },
