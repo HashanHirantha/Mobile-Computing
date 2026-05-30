@@ -27,12 +27,66 @@ export default function AppointmentDetailScreen() {
   }, [id]);
 
   const fetchAppointment = async () => {
+    // 1. Try Supabase
     const { data } = await supabase
       .from('appointments')
       .select('*, doctors(specialty, hospital_name, consultation_fee, profiles(first_name, last_name, profile_image)), diseases(name, severity)')
       .eq('id', id)
       .single();
-    setAppointment(data);
+      
+    if (data) {
+      setAppointment(data);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Try AsyncStorage (local appointments)
+    try {
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      const stored = await AsyncStorage.getItem('local_appointments');
+      if (stored) {
+        const localAppts = JSON.parse(stored);
+        const localMatch = localAppts.find((a: any) => a.id === id);
+        if (localMatch) {
+          setAppointment(localMatch);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    // 3. Try Mock appointments
+    const MOCK_APPOINTMENTS = [
+      {
+        id: '1',
+        appointment_date: '2026-05-30',
+        appointment_time: '14:30',
+        status: 'confirmed',
+        doctors: {
+          specialty: 'Cardiologist',
+          hospital_name: 'City Heart Institute',
+          consultation_fee: 3500,
+          profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' }
+        }
+      },
+      {
+        id: '2',
+        appointment_date: '2026-05-15',
+        appointment_time: '09:00',
+        status: 'completed',
+        doctors: {
+          specialty: 'Neurologist',
+          hospital_name: 'NeuroCare Center',
+          consultation_fee: 4000,
+          profiles: { first_name: 'Michael', last_name: 'Chen', profile_image: 'https://i.pravatar.cc/150?img=11' }
+        }
+      }
+    ];
+
+    const mockMatch = MOCK_APPOINTMENTS.find(a => a.id === id);
+    setAppointment(mockMatch || null);
     setLoading(false);
   };
 
