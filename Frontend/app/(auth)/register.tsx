@@ -14,17 +14,60 @@ import { Button } from '../../components/ui/Button';
 import { useAuth } from '../../hooks/useAuth';
 import { colors, typography, spacing } from '../../constants/theme';
 import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 
 export default function RegisterScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [profileImageUri, setProfileImageUri] = useState('');
+  
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dobDate, setDobDate] = useState(new Date());
+
   const { signUp } = useAuth();
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setDobDate(selectedDate);
+      setDateOfBirth(selectedDate.toISOString().split('T')[0]);
+    }
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      setError('Media library permission not granted.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets?.[0]) {
+      setProfileImageUri(result.assets[0].uri);
+    }
+  };
 
   const handleRegister = async () => {
     if (!firstName || !email || !password || !confirmPassword) {
@@ -51,7 +94,30 @@ export default function RegisterScreen() {
     const first = names[0];
     const last = names.slice(1).join(' ');
     
-    const { error: signUpError } = await signUp(email, password, { firstName: first, lastName: last });
+    let heightCm = parseFloat(height);
+    let weightKg = parseFloat(weight);
+    let bmi: number | undefined;
+
+    if (!isNaN(heightCm) && !isNaN(weightKg) && heightCm > 0 && weightKg > 0) {
+      const heightM = heightCm / 100;
+      bmi = parseFloat((weightKg / (heightM * heightM)).toFixed(2));
+    } else {
+      heightCm = undefined as any;
+      weightKg = undefined as any;
+    }
+    
+    const { error: signUpError } = await signUp(email, password, { 
+      firstName: first, 
+      lastName: last,
+      phone,
+      dateOfBirth,
+      gender,
+      bloodGroup,
+      profileImageUri,
+      heightCm,
+      weightKg,
+      bmi
+    });
     if (signUpError) {
       setError(signUpError.message);
     } else {
@@ -87,6 +153,19 @@ export default function RegisterScreen() {
 
         {/* Form Card */}
         <View style={styles.card}>
+          <View style={styles.avatarWrapper}>
+            <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
+              {profileImageUri ? (
+                <Image source={{ uri: profileImageUri }} style={styles.avatar} />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <Feather name="camera" size={24} color={colors.textSecondary} />
+                </View>
+              )}
+            </TouchableOpacity>
+            <Text style={styles.avatarLabel}>Profile Photo (Optional)</Text>
+          </View>
+
           <Input 
             label="Full Name" 
             value={firstName} 
@@ -103,6 +182,79 @@ export default function RegisterScreen() {
             placeholder="you@example.com"
             leftIcon="mail"
           />
+          <Input
+            label="Phone Number"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+            placeholder="+1 234 567 8900"
+            leftIcon="phone"
+          />
+          <TouchableOpacity onPress={() => setShowDatePicker(true)} activeOpacity={1}>
+            <View pointerEvents="none">
+              <Input
+                label="Date of Birth"
+                value={dateOfBirth}
+                editable={false}
+                placeholder="Select Date"
+                leftIcon="calendar"
+              />
+            </View>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={dobDate}
+              mode="date"
+              display="default"
+              onChange={onDateChange}
+              maximumDate={new Date()}
+            />
+          )}
+          
+          <View style={styles.pickerContainer}>
+            <Text style={styles.pickerLabel}>GENDER</Text>
+            <View style={styles.pickerWrapper}>
+              <Feather name="users" size={20} color={colors.textSecondary} style={styles.icon} />
+              <Picker
+                selectedValue={gender}
+                onValueChange={(itemValue) => setGender(itemValue)}
+                style={styles.picker}
+                dropdownIconColor={colors.textPrimary}
+                mode="dropdown"
+              >
+                <Picker.Item label="Select Gender" value="" color={colors.textSecondary} />
+                <Picker.Item label="Male" value="male" color={colors.textPrimary} />
+                <Picker.Item label="Female" value="female" color={colors.textPrimary} />
+                <Picker.Item label="Other" value="other" color={colors.textPrimary} />
+              </Picker>
+            </View>
+          </View>
+          <Input
+            label="Blood Group"
+            value={bloodGroup}
+            onChangeText={setBloodGroup}
+            placeholder="A+, O-, etc."
+            leftIcon="droplet"
+          />
+          
+          <Input
+            label="Height (cm)"
+            value={height}
+            onChangeText={setHeight}
+            placeholder="e.g. 175"
+            keyboardType="numeric"
+            leftIcon="maximize-2"
+          />
+          
+          <Input
+            label="Weight (kg)"
+            value={weight}
+            onChangeText={setWeight}
+            placeholder="e.g. 70"
+            keyboardType="numeric"
+            leftIcon="activity"
+          />
+
           <Input
             label="Password"
             value={password}
@@ -198,6 +350,55 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: spacing.lg,
     marginBottom: spacing.xl,
+  },
+  pickerContainer: { marginBottom: spacing.md },
+  pickerLabel: { ...typography.caption, color: colors.textPrimary, fontWeight: '700', marginBottom: spacing.xs, letterSpacing: 0.5 },
+  pickerWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    paddingLeft: spacing.md,
+    height: 54, // Match Input component height exactly
+  },
+  icon: { marginRight: spacing.sm },
+  picker: {
+    flex: 1,
+    color: colors.textPrimary,
+    ...Platform.select({
+      ios: { marginVertical: spacing.sm },
+      android: { backgroundColor: 'transparent' },
+    }),
+  },
+  avatarWrapper: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    marginBottom: spacing.sm,
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarLabel: {
+    ...typography.caption,
+    color: colors.textSecondary,
   },
   checkboxContainer: {
     flexDirection: 'row',
