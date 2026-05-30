@@ -1,4 +1,4 @@
-# 🗄️ MediGuide — Database Schema (Supabase)
+(# 🗄️ MediGuide — Database Schema (Supabase)
 
 ## Overview
 
@@ -91,6 +91,9 @@ Extends `auth.users` with app-specific user data. **Created automatically** via 
 | `date_of_birth` | `DATE`        | NULLABLE                                  | Date of birth                    |
 | `gender`        | `TEXT`        | CHECK IN ('male','female','other'), NULLABLE | Gender                        |
 | `blood_group`   | `VARCHAR(5)`  | NULLABLE                                  | Blood group (A+, B-, O+, etc.)   |
+| `height_cm`     | `NUMERIC(5,2)`| NULLABLE                                  | Height in centimeters            |
+| `weight_kg`     | `NUMERIC(5,2)`| NULLABLE                                  | Weight in kilograms              |
+| `bmi`           | `NUMERIC(5,2)`| NULLABLE                                  | Body Mass Index                  |
 | `profile_image` | `TEXT`        | NULLABLE                                  | Supabase Storage path/URL        |
 | `role`          | `TEXT`        | CHECK IN ('patient','doctor','admin'), DEFAULT 'patient' | User role     |
 | `is_active`     | `BOOLEAN`     | DEFAULT true                              | Account active status            |
