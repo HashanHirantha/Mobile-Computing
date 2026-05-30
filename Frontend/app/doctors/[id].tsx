@@ -6,20 +6,52 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { supabase } from '../../lib/supabase';
 import { TopBar } from '../../components/TopBar';
 
-const MOCK_DOCTOR = {
-  id: '1',
-  profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' },
-  average_rating: 4.9,
-  total_reviews: 127,
-  specialty: 'Cardiologist',
-  experience_years: 15,
-  qualification: 'MD, FACC',
-  hospital_name: 'City Heart Institute',
-  consultation_fee: 3500,
-  bio: 'Dr. Sarah Jenkins is a board-certified cardiologist with over 15 years of experience in interventional and preventive cardiology. She specializes in heart failure management, arrhythmia treatment, and cardiac rehabilitation programs.',
-  available_days: 'Mon, Wed, Fri',
-  available_from: '09:00',
-  available_to: '17:00',
+const MOCK_DOCTORS_DETAIL: Record<string, any> = {
+  '1': {
+    id: '1',
+    profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' },
+    average_rating: 4.9,
+    total_reviews: 127,
+    specialty: 'Cardiologist',
+    experience_years: 15,
+    qualification: 'MD, FACC',
+    hospital_name: 'City Heart Institute',
+    consultation_fee: 3500,
+    bio: 'Dr. Sarah Jenkins is a board-certified cardiologist with over 15 years of experience in interventional and preventive cardiology. She specializes in heart failure management, arrhythmia treatment, and cardiac rehabilitation programs.',
+    available_days: 'Mon, Wed, Fri',
+    available_from: '09:00',
+    available_to: '17:00',
+  },
+  '2': {
+    id: '2',
+    profiles: { first_name: 'Michael', last_name: 'Chen', profile_image: 'https://i.pravatar.cc/150?img=11' },
+    average_rating: 4.8,
+    total_reviews: 98,
+    specialty: 'Neurologist',
+    experience_years: 12,
+    qualification: 'MD, PhD',
+    hospital_name: 'NeuroCare Center',
+    consultation_fee: 4000,
+    bio: 'Dr. Michael Chen is a leading neurologist specializing in movement disorders and neurodegenerative diseases. He has extensive experience in treating Parkinson\'s disease and offers advanced therapeutic options.',
+    available_days: 'Tue, Thu, Sat',
+    available_from: '10:00',
+    available_to: '18:00',
+  },
+  '3': {
+    id: '3',
+    profiles: { first_name: 'Emily', last_name: 'Davis', profile_image: 'https://i.pravatar.cc/150?img=32' },
+    average_rating: 4.7,
+    total_reviews: 215,
+    specialty: 'General Medicine',
+    experience_years: 8,
+    qualification: 'MBBS, MD',
+    hospital_name: 'Community Health Clinic',
+    consultation_fee: 2500,
+    bio: 'Dr. Emily Davis is a compassionate general physician focused on comprehensive adult medicine. She provides routine check-ups, chronic disease management, and preventive care for her patients.',
+    available_days: 'Mon, Tue, Wed, Thu, Fri',
+    available_from: '08:00',
+    available_to: '16:00',
+  }
 };
 
 const MOCK_REVIEWS = [
@@ -51,14 +83,16 @@ export default function DoctorDetailScreen() {
         .order('created_at', { ascending: false })
         .limit(5),
     ]);
-    setDoctor(docRes.data || MOCK_DOCTOR);
+    const mockDoc = MOCK_DOCTORS_DETAIL[id] || MOCK_DOCTORS_DETAIL['1'];
+    setDoctor(docRes.data || mockDoc);
     setReviews(revRes.data?.length ? revRes.data : MOCK_REVIEWS);
     setLoading(false);
   };
 
   if (loading) return <LoadingSpinner />;
 
-  const doc = doctor || MOCK_DOCTOR;
+  const mockDoc = MOCK_DOCTORS_DETAIL[id] || MOCK_DOCTORS_DETAIL['1'];
+  const doc = doctor || mockDoc;
   const name = `Dr. ${doc.profiles?.first_name} ${doc.profiles?.last_name}`;
 
   return (

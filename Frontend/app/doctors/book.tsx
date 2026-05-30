@@ -16,11 +16,25 @@ const TIME_SLOTS = [
   { time: '16:00', label: '4:00 PM' },
 ];
 
-const MOCK_DOCTOR = {
-  id: '1',
-  profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' },
-  specialty: 'Cardiologist',
-  consultation_fee: 3500,
+const MOCK_DOCTORS_DETAIL: Record<string, any> = {
+  '1': {
+    id: '1',
+    profiles: { first_name: 'Sarah', last_name: 'Jenkins', profile_image: 'https://i.pravatar.cc/150?img=47' },
+    specialty: 'Cardiologist',
+    consultation_fee: 3500,
+  },
+  '2': {
+    id: '2',
+    profiles: { first_name: 'Michael', last_name: 'Chen', profile_image: 'https://i.pravatar.cc/150?img=11' },
+    specialty: 'Neurologist',
+    consultation_fee: 4000,
+  },
+  '3': {
+    id: '3',
+    profiles: { first_name: 'Emily', last_name: 'Davis', profile_image: 'https://i.pravatar.cc/150?img=32' },
+    specialty: 'General Medicine',
+    consultation_fee: 2500,
+  }
 };
 
 export default function BookScreen() {
@@ -40,7 +54,8 @@ export default function BookScreen() {
       .eq('id', doctorId)
       .single()
       .then(({ data }) => {
-        setDoctor(data || MOCK_DOCTOR);
+        const mockDoc = MOCK_DOCTORS_DETAIL[doctorId] || MOCK_DOCTORS_DETAIL['1'];
+        setDoctor(data || mockDoc);
         setFetchLoading(false);
       });
   }, [doctorId]);
@@ -68,7 +83,8 @@ export default function BookScreen() {
     }
     setLoading(true);
 
-    const doc = doctor || MOCK_DOCTOR;
+    const mockDoc = MOCK_DOCTORS_DETAIL[doctorId] || MOCK_DOCTORS_DETAIL['1'];
+    const doc = doctor || mockDoc;
     const newAppointment = {
       id: `local-${Date.now()}`,
       patient_id: user?.id || 'local-user',
@@ -126,7 +142,8 @@ export default function BookScreen() {
 
   if (fetchLoading) return <LoadingSpinner />;
 
-  const doc = doctor || MOCK_DOCTOR;
+  const mockDoc = MOCK_DOCTORS_DETAIL[doctorId] || MOCK_DOCTORS_DETAIL['1'];
+  const doc = doctor || mockDoc;
   const doctorName = `Dr. ${doc?.profiles?.first_name} ${doc?.profiles?.last_name}`;
   const dates = getDates();
 
