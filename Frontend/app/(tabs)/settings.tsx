@@ -16,9 +16,9 @@ export default function SettingsScreen() {
     ]);
   };
 
-  const firstName = profile?.first_name || 'Richard';
-  const lastName = profile?.last_name || 'Brown';
-  const fullName = `${firstName} ${lastName}`;
+  const firstName = profile?.first_name || 'User';
+  const lastName = profile?.last_name || '';
+  const fullName = `${firstName} ${lastName}`.trim();
 
   return (
     <SafeAreaView style={globalStyles.safeArea}>

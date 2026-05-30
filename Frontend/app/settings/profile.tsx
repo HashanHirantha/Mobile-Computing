@@ -6,17 +6,37 @@ import { colors, typography, spacing } from '../../constants/theme';
 import { useAuth } from '../../hooks/useAuth';
 import { globalStyles } from '../../constants/globalStyles';
 
-export default function ProfileSettingsScreen() {
-  const { profile } = useAuth();
-  
-  const [firstName, setFirstName] = useState(profile?.first_name || 'Richard');
-  const [lastName, setLastName] = useState(profile?.last_name || 'Brown');
-  const [email, setEmail] = useState('richard.brown@example.com');
-  const [phone, setPhone] = useState('+1 234 567 8900');
+import { supabase } from '../../lib/supabase';
 
-  const handleSave = () => {
-    // In a real app, you would call an API or Supabase update here
-    Alert.alert('Success', 'Profile updated successfully!');
+export default function ProfileSettingsScreen() {
+  const { user, profile, refreshProfile } = useAuth();
+  
+  const [firstName, setFirstName] = useState(profile?.first_name || '');
+  const [lastName, setLastName] = useState(profile?.last_name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(profile?.phone || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone,
+      })
+      .eq('id', user.id);
+      
+    setSaving(false);
+    
+    if (error) {
+      Alert.alert('Error', error.message);
+    } else {
+      refreshProfile();
+      Alert.alert('Success', 'Profile updated successfully!');
+    }
   };
 
   const handleImagePick = () => {
@@ -93,8 +113,12 @@ export default function ProfileSettingsScreen() {
             />
           </View>
 
-          <TouchableOpacity style={[globalStyles.buttonPrimary, { marginTop: spacing.lg }]} onPress={handleSave}>
-            <Text style={globalStyles.buttonPrimaryText}>Save Changes</Text>
+          <TouchableOpacity 
+            style={[globalStyles.buttonPrimary, { marginTop: spacing.lg, opacity: saving ? 0.7 : 1 }]} 
+            onPress={handleSave}
+            disabled={saving}
+          >
+            <Text style={globalStyles.buttonPrimaryText}>{saving ? 'Saving...' : 'Save Changes'}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

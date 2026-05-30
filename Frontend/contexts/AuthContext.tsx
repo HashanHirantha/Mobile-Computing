@@ -40,10 +40,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.log('Session retrieval error:', error.message);
+        // If there's an error (e.g. invalid refresh token), we can clear the session
+        supabase.auth.signOut();
+      }
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) fetchProfile(session.user.id);
+      setLoading(false);
+    }).catch((e) => {
+      console.log('Session error:', e);
       setLoading(false);
     });
 
