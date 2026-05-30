@@ -11,13 +11,22 @@ export default function HomeScreen() {
   // Use profile name if available, otherwise fallback to "Alex" to match the mockup
   const firstName = profile?.first_name || 'Alex';
 
+  // Determine greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+  const greeting = getGreeting();
+
   return (
     <SafeAreaView style={globalStyles.safeArea}>
       <TopBar />
       <ScrollView style={globalStyles.container} contentContainerStyle={[globalStyles.content, { paddingBottom: 100 }]}>
         
         {/* Greeting */}
-        <Text style={styles.greetingTitle}>Good Morning, {firstName}</Text>
+        <Text style={styles.greetingTitle}>{greeting}, {firstName}</Text>
         <Text style={styles.greetingSubtitle}>Your heart vitality is at 94% today.</Text>
 
         {/* Search */}

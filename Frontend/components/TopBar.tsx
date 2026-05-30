@@ -15,10 +15,18 @@ export function TopBar() {
       
       <Text style={styles.headerTitle}>MediGuide</Text>
       
-      <Image 
-        source={{ uri: profile?.profile_image || 'https://i.pravatar.cc/150?img=11' }} 
-        style={styles.avatar} 
-      />
+      <TouchableOpacity onPress={() => router.push('/settings/profile')}>
+        {profile?.profile_image ? (
+          <Image 
+            source={{ uri: profile.profile_image }} 
+            style={styles.avatar} 
+          />
+        ) : (
+          <View style={[styles.avatar, { backgroundColor: '#E1E8ED', justifyContent: 'center', alignItems: 'center' }]}>
+            <Feather name="user" size={20} color="#88B0C8" />
+          </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
