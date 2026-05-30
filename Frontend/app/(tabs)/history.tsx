@@ -10,6 +10,7 @@ import { colors, typography, spacing } from '../../constants/theme';
 import { Avatar } from '../../components/ui/Avatar';
 import { Badge } from '../../components/ui/Badge';
 import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9500',
   confirmed: colors.secondary,
@@ -143,30 +144,30 @@ export default function HistoryScreen() {
 
   const renderTitle = () => (
     <View style={styles.titleContainer}>
-      <Text style={styles.title}>My History</Text>
-      <Text style={styles.description}>
+      <Text style={globalStyles.pageTitle}>My History</Text>
+      <Text style={globalStyles.pageDescription}>
         View your past appointments and diagnosis history here.
       </Text>
     </View>
   );
 
   const renderTabs = () => (
-    <View style={styles.filterList}>
+    <View style={globalStyles.filterList}>
       <TouchableOpacity
-        style={[styles.filterChip, activeTab === 'appointments' ? styles.filterChipActive : styles.filterChipInactive]}
+        style={[globalStyles.filterChip, activeTab === 'appointments' ? globalStyles.filterChipActive : globalStyles.filterChipInactive]}
         onPress={() => setActiveTab('appointments')}
         activeOpacity={0.8}
       >
-        <Text style={[styles.filterText, activeTab === 'appointments' ? styles.filterTextActive : styles.filterTextInactive]}>
+        <Text style={[globalStyles.filterText, activeTab === 'appointments' ? globalStyles.filterTextActive : globalStyles.filterTextInactive]}>
           Appointments
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.filterChip, activeTab === 'diagnoses' ? styles.filterChipActive : styles.filterChipInactive]}
+        style={[globalStyles.filterChip, activeTab === 'diagnoses' ? globalStyles.filterChipActive : globalStyles.filterChipInactive]}
         onPress={() => setActiveTab('diagnoses')}
         activeOpacity={0.8}
       >
-        <Text style={[styles.filterText, activeTab === 'diagnoses' ? styles.filterTextActive : styles.filterTextInactive]}>
+        <Text style={[globalStyles.filterText, activeTab === 'diagnoses' ? globalStyles.filterTextActive : globalStyles.filterTextInactive]}>
           Diagnoses
         </Text>
       </TouchableOpacity>
@@ -239,7 +240,7 @@ export default function HistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={globalStyles.safeArea}>
       <TopBar />
       
       <FlatList
@@ -256,7 +257,7 @@ export default function HistoryScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           loading ? <LoadingSpinner /> : (
-            <Text style={styles.emptyText}>
+            <Text style={globalStyles.emptyText}>
               No {activeTab === 'appointments' ? 'appointments' : 'diagnoses'} found.
             </Text>
           )
@@ -267,10 +268,6 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -293,51 +290,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
   },
-  title: {
-    ...typography.h1,
-    color: colors.black,
-    marginBottom: spacing.sm,
-  },
-  description: {
-    ...typography.body,
-    color: '#4A5568',
-    lineHeight: 22,
-  },
-  filterList: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    gap: spacing.sm,
-  },
-  filterChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-    marginRight: spacing.sm,
-  },
-  filterChipActive: {
-    backgroundColor: '#111827',
-  },
-  filterChipInactive: {
-    backgroundColor: colors.authCardBg,
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  filterTextActive: {
-    color: '#FFFFFF',
-  },
-  filterTextInactive: {
-    color: '#4A5568',
-  },
   listContainer: {
     paddingBottom: spacing.xl,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: colors.textSecondary,
-    marginTop: spacing.xl,
   },
   
   // Compact Card Styles

@@ -5,7 +5,9 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { useRealtime } from '../../hooks/useRealtime';
-import { colors, typography, spacing } from '../../constants/theme';
+import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
+import { colors } from '../../constants/theme';
 
 export default function AppointmentsScreen() {
   const { user } = useAuth();
@@ -31,10 +33,12 @@ export default function AppointmentsScreen() {
   useRealtime('appointments', `patient_id=eq.${user?.id}`, fetchAppointments);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Appointments</Text>
-      </View>
+    <View style={globalStyles.safeArea}>
+      <TopBar />
+      <View style={globalStyles.container}>
+        <View style={styles.header}>
+          <Text style={globalStyles.pageTitle}>My Appointments</Text>
+        </View>
 
       {loading ? (
         <LoadingSpinner />
@@ -47,18 +51,16 @@ export default function AppointmentsScreen() {
           )}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
-            <Text style={styles.empty}>You have no appointments yet.</Text>
+            <Text style={globalStyles.emptyText}>You have no appointments yet.</Text>
           }
         />
       )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { padding: spacing.lg },
-  title: { ...typography.h1, color: colors.textPrimary },
-  list: { padding: spacing.md },
-  empty: { ...typography.body, color: colors.textSecondary, textAlign: 'center', marginTop: spacing.xl },
+  header: { paddingHorizontal: 24, paddingTop: 20 },
+  list: { padding: 24 },
 });

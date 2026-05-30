@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAr
 import { router } from 'expo-router';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
 export default function SymptomCheckerScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -10,18 +11,18 @@ export default function SymptomCheckerScreen() {
   const allSymptoms = ['Palpitations', 'Chest Tightness', 'Fatigue', 'Dizziness', 'Swollen Ankles'];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={globalStyles.safeArea}>
       <TopBar />
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView style={globalStyles.container} contentContainerStyle={styles.content}>
         
         {/* Huge Title */}
         <Text style={styles.mainTitle}>Symptom Checker</Text>
-        <Text style={styles.subtitle}>
+        <Text style={globalStyles.pageDescription}>
           Tell us how you're feeling. Our AI analyzes your inputs for potential cardiac patterns.
         </Text>
 
         {/* Step Card */}
-        <View style={styles.card}>
+        <View style={globalStyles.cardPadded}>
           <View style={styles.stepContainer}>
             <View style={styles.progressCircle}>
               <Text style={styles.progressText}>75%</Text>
@@ -34,8 +35,8 @@ export default function SymptomCheckerScreen() {
         </View>
 
         {/* Add Symptom Card */}
-        <View style={styles.card}>
-          <Text style={styles.sectionLabel}>ADD SYMPTOM</Text>
+        <View style={globalStyles.cardPadded}>
+          <Text style={globalStyles.sectionTitle}>ADD SYMPTOM</Text>
           <View style={styles.inputContainer}>
             <Feather name="search" size={20} color="#888" style={styles.searchIcon} />
             <TextInput
@@ -49,8 +50,8 @@ export default function SymptomCheckerScreen() {
         </View>
 
         {/* Common Observations Card */}
-        <View style={styles.card}>
-          <Text style={styles.sectionLabel}>COMMON OBSERVATIONS</Text>
+        <View style={globalStyles.cardPadded}>
+          <Text style={globalStyles.sectionTitle}>COMMON OBSERVATIONS</Text>
           <View style={styles.chipsContainer}>
             {allSymptoms.map((symptom) => {
               const isSelected = selectedSymptoms.includes(symptom);
@@ -65,8 +66,8 @@ export default function SymptomCheckerScreen() {
         </View>
 
         {/* Duration Card */}
-        <View style={styles.card}>
-          <Text style={styles.sectionLabel}>DURATION</Text>
+        <View style={globalStyles.cardPadded}>
+          <Text style={globalStyles.sectionTitle}>DURATION</Text>
           <View style={styles.durationRow}>
             <Text style={styles.durationLabel}>Ongoing since:</Text>
             <Text style={styles.durationValue}>3 days</Text>
@@ -93,7 +94,7 @@ export default function SymptomCheckerScreen() {
         </Text>
 
         {/* Preliminary Insights Card */}
-        <View style={styles.card}>
+        <View style={globalStyles.cardPadded}>
           <View style={styles.insightsHeader}>
             <Text style={styles.insightsTitle}>Preliminary Insights</Text>
             <View style={styles.badge}>
@@ -138,13 +139,6 @@ export default function SymptomCheckerScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-  },
   content: {
     padding: 20,
   },
@@ -180,18 +174,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     lineHeight: 45,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-    marginBottom: 30,
-  },
-  card: {
-    backgroundColor: '#C8E8FE',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-  },
   stepContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -214,13 +196,6 @@ const styles = StyleSheet.create({
   },
   stepTextContainer: {
     flex: 1,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#000',
-    letterSpacing: 1,
-    marginBottom: 10,
   },
   stepDescription: {
     fontSize: 16,

@@ -5,6 +5,7 @@ import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { supabase } from '../../lib/supabase';
 import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
 
 const MOCK_DOCTORS_DETAIL: Record<string, any> = {
   '1': {
@@ -96,18 +97,18 @@ export default function DoctorDetailScreen() {
   const name = `Dr. ${doc.profiles?.first_name} ${doc.profiles?.last_name}`;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={globalStyles.safeArea}>
       <TopBar />
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView style={globalStyles.container} contentContainerStyle={globalStyles.content}>
 
         {/* Doctor Profile Card */}
-        <View style={styles.profileCard}>
+        <View style={globalStyles.profileCard}>
           <Image
             source={{ uri: doc.profiles?.profile_image || 'https://i.pravatar.cc/150?img=11' }}
             style={styles.doctorImage}
           />
-          <View style={styles.profileInfo}>
-            <Text style={styles.doctorName}>{name}</Text>
+          <View style={globalStyles.profileInfo}>
+            <Text style={globalStyles.profileName}>{name}</Text>
             <View style={styles.specialtyBadge}>
               <Text style={styles.specialtyText}>{doc.specialty?.toUpperCase() || 'CARDIOLOGIST'}</Text>
             </View>
@@ -139,16 +140,16 @@ export default function DoctorDetailScreen() {
         </View>
 
         {/* About Section */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionLabel}>ABOUT</Text>
+        <View style={globalStyles.cardPadded}>
+          <Text style={globalStyles.sectionTitle}>ABOUT</Text>
           <Text style={styles.aboutText}>
             {doc.bio || `${name} is a highly experienced ${doc.specialty} dedicated to providing exceptional patient care.`}
           </Text>
         </View>
 
         {/* Details Section */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionLabel}>DETAILS</Text>
+        <View style={globalStyles.cardPadded}>
+          <Text style={globalStyles.sectionTitle}>DETAILS</Text>
           {[
             { icon: 'briefcase', label: 'Qualification', value: doc.qualification || 'MD, FACC' },
             { icon: 'map-pin', label: 'Hospital', value: doc.hospital_name || 'City Heart Institute' },
@@ -172,9 +173,9 @@ export default function DoctorDetailScreen() {
         </View>
 
         {/* Reviews Section */}
-        <View style={styles.sectionCard}>
+        <View style={globalStyles.cardPadded}>
           <View style={styles.reviewsHeader}>
-            <Text style={styles.sectionLabel}>REVIEWS</Text>
+            <Text style={globalStyles.sectionTitle}>REVIEWS</Text>
             <Text style={styles.seeAll}>See All</Text>
           </View>
           {reviews.map((r) => (
@@ -206,11 +207,11 @@ export default function DoctorDetailScreen() {
             <Text style={styles.feeValue}>LKR {doc.consultation_fee || 3500}</Text>
           </View>
           <TouchableOpacity
-            style={styles.bookButton}
+            style={globalStyles.buttonPrimary}
             activeOpacity={0.8}
             onPress={() => router.push({ pathname: '/doctors/book', params: { doctorId: id } })}
           >
-            <Text style={styles.bookButtonText}>Book Now</Text>
+            <Text style={globalStyles.buttonPrimaryText}>Book Now</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -219,26 +220,6 @@ export default function DoctorDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 24,
-  },
-
-  // Profile Card
-  profileCard: {
-    backgroundColor: '#C8E8FE',
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
   doctorImage: {
     width: 80,
     height: 80,
@@ -246,15 +227,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
     borderWidth: 3,
     borderColor: 'rgba(255,255,255,0.6)',
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  doctorName: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 6,
   },
   specialtyBadge: {
     backgroundColor: 'rgba(255,255,255,0.6)',
@@ -311,20 +283,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Section Card
-  sectionCard: {
-    backgroundColor: '#C8E8FE',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2E4A62',
-    letterSpacing: 1,
-    marginBottom: 12,
-  },
+  // About Text
   aboutText: {
     fontSize: 14,
     color: '#4A5568',
@@ -433,16 +392,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#1A1A1A',
-  },
-  bookButton: {
-    backgroundColor: '#111827',
-    paddingHorizontal: 40,
-    paddingVertical: 16,
-    borderRadius: 14,
-  },
-  bookButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

@@ -5,7 +5,9 @@ import { DiseaseCard } from '../../components/DiseaseCard';
 import { Button } from '../../components/ui/Button';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { predictDisease } from '../../services/diseaseService';
-import { colors, typography, spacing } from '../../constants/theme';
+import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
+import { colors } from '../../constants/theme';
 
 export default function ResultsScreen() {
   const { symptomIds } = useLocalSearchParams<{ symptomIds: string }>();
@@ -32,11 +34,13 @@ export default function ResultsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Prediction Results</Text>
-        <Text style={styles.subtitle}>Based on your symptoms, here are the possible conditions:</Text>
-      </View>
+    <View style={globalStyles.safeArea}>
+      <TopBar />
+      <View style={globalStyles.container}>
+        <View style={styles.header}>
+          <Text style={globalStyles.pageTitle}>Prediction Results</Text>
+          <Text style={globalStyles.pageDescription}>Based on your symptoms, here are the possible conditions:</Text>
+        </View>
 
       {loading ? (
         <LoadingSpinner />
@@ -44,7 +48,7 @@ export default function ResultsScreen() {
         <Text style={styles.error}>{error}</Text>
       ) : predictions.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyText}>No diseases matched your symptoms. Please consult a General Practitioner.</Text>
+          <Text style={globalStyles.emptyText}>No diseases matched your symptoms. Please consult a General Practitioner.</Text>
         </View>
       ) : (
         <FlatList
@@ -65,25 +69,22 @@ export default function ResultsScreen() {
         </Text>
         <Button title="Start Over" onPress={() => router.back()} variant="outline" />
       </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { padding: spacing.lg },
-  title: { ...typography.h1, color: colors.textPrimary },
-  subtitle: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
-  error: { ...typography.body, color: colors.accent, padding: spacing.lg },
-  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl },
-  emptyText: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
-  list: { padding: spacing.md },
+  header: { paddingHorizontal: 24, paddingTop: 20 },
+  error: { fontSize: 14, color: colors.accent, padding: 24 },
+  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
+  list: { padding: 24 },
   footer: {
-    padding: spacing.lg,
+    padding: 24,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.surface,
-    gap: spacing.md,
+    gap: 16,
   },
-  disclaimer: { ...typography.caption, color: '#7A5F00', textAlign: 'center' },
+  disclaimer: { fontSize: 12, color: '#7A5F00', textAlign: 'center' },
 });

@@ -4,6 +4,7 @@ import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
 export default function HomeScreen() {
   const { profile } = useAuth();
   
@@ -11,9 +12,9 @@ export default function HomeScreen() {
   const firstName = profile?.first_name || 'Alex';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={globalStyles.safeArea}>
       <TopBar />
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView style={globalStyles.container} contentContainerStyle={[globalStyles.content, { paddingBottom: 100 }]}>
         
         {/* Greeting */}
         <Text style={styles.greetingTitle}>Good Morning, {firstName}</Text>
@@ -72,17 +73,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 24,
-    paddingBottom: 100, // Space for FAB
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',

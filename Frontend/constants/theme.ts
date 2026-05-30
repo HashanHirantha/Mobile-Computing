@@ -12,6 +12,13 @@ export const colors = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   border: '#E5E7EB',
+  
+  // App-Specific Global Theme Colors
+  cardLight: '#C8E8FE', // Light blue used for settings cards and banners
+  buttonDark: '#111827', // Dark black/blue for primary buttons
+  textTertiary: '#4A5B69', // Muted text for subtitles and descriptions
+  iconDark: '#2E4A62', // Darker blue used for primary icons
+  iconLight: '#88B0C8', // Lighter blue used for secondary icons (e.g. chevrons)
 } as const;
 
 // ─── Spacing ─────────────────────────────────────────────────

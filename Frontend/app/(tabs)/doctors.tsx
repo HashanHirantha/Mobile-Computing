@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { colors, typography, spacing, radius } from '../../constants/theme';
 import { Avatar } from '../../components/ui/Avatar';
 import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
 const SPECIALTIES = ['All Doctors', 'Cardiologist', 'Neurologist', 'General Medicine'];
 
 const MOCK_DOCTORS = [
@@ -44,8 +45,8 @@ export default function DoctorsScreen() {
 
   const renderTitle = () => (
     <View style={styles.titleContainer}>
-      <Text style={styles.title}>Find Your Specialist</Text>
-      <Text style={styles.description}>
+      <Text style={globalStyles.pageTitle}>Find Your Specialist</Text>
+      <Text style={globalStyles.pageDescription}>
         Consult with our world-class medical professionals specializing in cardiac vitality and neurological flow.
       </Text>
     </View>
@@ -57,16 +58,16 @@ export default function DoctorsScreen() {
       horizontal
       showsHorizontalScrollIndicator={false}
       keyExtractor={(item) => item}
-      contentContainerStyle={styles.filterList}
+      contentContainerStyle={globalStyles.filterList}
       renderItem={({ item }) => {
         const isActive = activeSpecialty === item;
         return (
           <TouchableOpacity
-            style={[styles.filterChip, isActive ? styles.filterChipActive : styles.filterChipInactive]}
+            style={[globalStyles.filterChip, isActive ? globalStyles.filterChipActive : globalStyles.filterChipInactive]}
             onPress={() => setActiveSpecialty(item)}
             activeOpacity={0.8}
           >
-            <Text style={[styles.filterText, isActive ? styles.filterTextActive : styles.filterTextInactive]}>
+            <Text style={[globalStyles.filterText, isActive ? globalStyles.filterTextActive : globalStyles.filterTextInactive]}>
               {item}
             </Text>
           </TouchableOpacity>
@@ -102,7 +103,7 @@ export default function DoctorsScreen() {
                 <Text style={styles.specialtyText}>{item.specialty?.toUpperCase() || 'CARDIOLOGIST'}</Text>
               </View>
               <Text style={styles.featuredBio} numberOfLines={2}>
-                {item.profiles?.first_name} is an invasive, non-interventional cardiologist...
+                {item.bio || `${item.profiles?.first_name} is an experienced specialist dedicated to providing exceptional patient care and advanced treatments.`}
               </Text>
             </View>
           </View>
@@ -118,8 +119,8 @@ export default function DoctorsScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.bookButtonMain} onPress={() => router.push({ pathname: '/doctors/book', params: { doctorId: item.id } })}>
-            <Text style={styles.bookButtonMainText}>Book Now</Text>
+          <TouchableOpacity style={globalStyles.buttonPrimary} onPress={() => router.push({ pathname: '/doctors/book', params: { doctorId: item.id } })}>
+            <Text style={globalStyles.buttonPrimaryText}>Book Now</Text>
           </TouchableOpacity>
         </TouchableOpacity>
       );
@@ -151,7 +152,7 @@ export default function DoctorsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={globalStyles.safeArea}>
       <TopBar />
       
       <FlatList
@@ -167,7 +168,7 @@ export default function DoctorsScreen() {
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          loading ? <LoadingSpinner /> : <Text style={styles.emptyText}>No doctors found.</Text>
+          loading ? <LoadingSpinner /> : <Text style={globalStyles.emptyText}>No doctors found.</Text>
         }
       />
     </SafeAreaView>
@@ -175,10 +176,6 @@ export default function DoctorsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -201,50 +198,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
   },
-  title: {
-    ...typography.h1,
-    color: colors.black,
-    marginBottom: spacing.sm,
-  },
-  description: {
-    ...typography.body,
-    color: '#4A5568', // slightly darker secondary text for better readability
-    lineHeight: 22,
-  },
-  filterList: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    gap: spacing.sm,
-  },
-  filterChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-    marginRight: spacing.sm,
-  },
-  filterChipActive: {
-    backgroundColor: '#111827', // dark almost black
-  },
-  filterChipInactive: {
-    backgroundColor: colors.authCardBg,
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  filterTextActive: {
-    color: '#FFFFFF',
-  },
-  filterTextInactive: {
-    color: '#4A5568',
-  },
   listContainer: {
     paddingBottom: spacing.xl,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: colors.textSecondary,
-    marginTop: spacing.xl,
   },
   
   // Featured Card Styles
@@ -334,17 +289,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     color: colors.black,
-  },
-  bookButtonMain: {
-    backgroundColor: '#111827',
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  bookButtonMainText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
   
   // Compact Card Styles

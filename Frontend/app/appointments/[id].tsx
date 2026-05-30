@@ -5,8 +5,10 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { supabase } from '../../lib/supabase';
+import { TopBar } from '../../components/TopBar';
 import { useAuth } from '../../hooks/useAuth';
-import { colors, typography, spacing } from '../../constants/theme';
+import { globalStyles } from '../../constants/globalStyles';
+import { colors } from '../../constants/theme';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#FF9500',
@@ -28,9 +30,9 @@ export default function AppointmentDetailScreen() {
 
   const fetchAppointment = async () => {
     // 1. Try Supabase
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('appointments')
-      .select('*, doctors(specialty, hospital_name, consultation_fee, profiles(first_name, last_name, profile_image)), diseases(name, severity)')
+      .select('*, doctors(specialty, hospital_name, consultation_fee, profiles(first_name, last_name, profile_image))')
       .eq('id', id)
       .single();
       
@@ -85,7 +87,7 @@ export default function AppointmentDetailScreen() {
       }
     ];
 
-    const mockMatch = MOCK_APPOINTMENTS.find(a => a.id === id);
+    const mockMatch = MOCK_APPOINTMENTS.find(a => String(a.id) === String(id));
     setAppointment(mockMatch || null);
     setLoading(false);
   };
@@ -114,10 +116,12 @@ export default function AppointmentDetailScreen() {
   const canCancel = ['pending', 'confirmed'].includes(appointment.status);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Appointment Details</Text>
+    <View style={globalStyles.safeArea}>
+      <TopBar />
+      <ScrollView style={globalStyles.container} contentContainerStyle={globalStyles.content}>
+        <Text style={globalStyles.pageTitle}>Appointment Details</Text>
 
-      <View style={styles.card}>
+        <View style={globalStyles.profileCard}>
         <Text style={styles.doctorName}>{doctorName}</Text>
         <Text style={styles.specialty}>{appointment.doctors?.specialty}</Text>
         <Text style={styles.hospital}>{appointment.doctors?.hospital_name}</Text>
@@ -129,12 +133,11 @@ export default function AppointmentDetailScreen() {
         </View>
       </View>
 
-      <View style={styles.card}>
+      <View style={globalStyles.cardPadded}>
         {[
           { label: 'Date', value: new Date(appointment.appointment_date).toLocaleDateString('en', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) },
           { label: 'Time', value: appointment.appointment_time },
-          { label: 'Consultation Fee', value: `LKR ${appointment.doctors?.consultation_fee}` },
-          { label: 'Predicted Condition', value: appointment.diseases?.name ?? 'Not specified' },
+          { label: 'Consultation Fee', value: `LKR ${appointment.doctors?.consultation_fee || '3500'}` },
         ].map((item, idx, arr) => (
           <View key={item.label} style={[styles.row, idx < arr.length - 1 && styles.rowBorder]}>
             <Text style={styles.rowLabel}>{item.label}</Text>
@@ -144,8 +147,8 @@ export default function AppointmentDetailScreen() {
       </View>
 
       {appointment.notes ? (
-        <View style={styles.card}>
-          <Text style={styles.rowLabel}>Notes</Text>
+        <View style={globalStyles.cardPadded}>
+          <Text style={globalStyles.sectionTitle}>Notes</Text>
           <Text style={styles.notes}>{appointment.notes}</Text>
         </View>
       ) : null}
@@ -161,23 +164,20 @@ export default function AppointmentDetailScreen() {
           variant="outline"
         />
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.md },
-  title: { ...typography.h1, color: colors.textPrimary },
-  card: { backgroundColor: colors.surface, borderRadius: 12, padding: spacing.md, borderWidth: 1, borderColor: colors.border, gap: spacing.xs },
-  doctorName: { ...typography.h2, color: colors.textPrimary },
-  specialty: { ...typography.body, color: colors.primary },
-  hospital: { ...typography.caption, color: colors.textSecondary },
-  statusRow: { alignSelf: 'flex-start', marginTop: spacing.xs },
-  row: { flexDirection: 'row', justifyContent: 'space-between', padding: spacing.sm },
+  doctorName: { fontSize: 20, fontWeight: '700', color: colors.black, marginBottom: 4 },
+  specialty: { fontSize: 14, color: colors.primary, marginBottom: 2 },
+  hospital: { fontSize: 12, color: colors.textSecondary },
+  statusRow: { alignSelf: 'flex-start', marginTop: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', padding: 8 },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  rowLabel: { ...typography.caption, color: colors.textSecondary },
-  rowValue: { ...typography.body, color: colors.textPrimary, fontWeight: '500', maxWidth: '60%', textAlign: 'right' },
-  notes: { ...typography.body, color: colors.textSecondary, marginTop: spacing.xs },
-  error: { ...typography.body, color: colors.accent, padding: spacing.lg },
+  rowLabel: { fontSize: 12, color: colors.textSecondary },
+  rowValue: { fontSize: 14, color: colors.textPrimary, fontWeight: '500', maxWidth: '60%', textAlign: 'right' },
+  notes: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
+  error: { fontSize: 16, color: colors.accent, padding: 24, textAlign: 'center' },
 });

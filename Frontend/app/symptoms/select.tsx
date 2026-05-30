@@ -6,7 +6,9 @@ import { SymptomCard } from '../../components/SymptomCard';
 import { Button } from '../../components/ui/Button';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { useSymptoms } from '../../hooks/useSymptoms';
-import { colors, typography, spacing } from '../../constants/theme';
+import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
+import { colors } from '../../constants/theme';
 
 const BODY_PARTS = ['All', 'Head', 'Chest', 'Abdomen', 'Skin', 'Eyes', 'Musculoskeletal', 'Neurological', 'General'];
 
@@ -34,15 +36,17 @@ export default function SymptomSelectScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Select Symptoms</Text>
-        <Input
-          value={search}
-          onChangeText={handleSearch}
-          placeholder="Search symptoms..."
-        />
-      </View>
+    <View style={globalStyles.safeArea}>
+      <TopBar />
+      <View style={globalStyles.container}>
+        <View style={styles.header}>
+          <Text style={globalStyles.pageTitle}>Select Symptoms</Text>
+          <Input
+            value={search}
+            onChangeText={handleSearch}
+            placeholder="Search symptoms..."
+          />
+        </View>
 
       {/* Body Part Filter */}
       <FlatList
@@ -50,13 +54,13 @@ export default function SymptomSelectScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item}
-        contentContainerStyle={styles.filterRow}
+        contentContainerStyle={globalStyles.filterList}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.chip, bodyPart === item && styles.chipActive]}
+            style={[globalStyles.filterChip, bodyPart === item ? globalStyles.filterChipActive : globalStyles.filterChipInactive]}
             onPress={() => setBodyPart(item)}
           >
-            <Text style={[styles.chipText, bodyPart === item && styles.chipTextActive]}>{item}</Text>
+            <Text style={[globalStyles.filterText, bodyPart === item ? globalStyles.filterTextActive : globalStyles.filterTextInactive]}>{item}</Text>
           </TouchableOpacity>
         )}
       />
@@ -81,26 +85,13 @@ export default function SymptomSelectScreen() {
           disabled={selected.length === 0}
         />
       </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: { padding: spacing.lg, gap: spacing.md },
-  title: { ...typography.h1, color: colors.textPrimary },
-  filterRow: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm, gap: spacing.sm },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { ...typography.caption, color: colors.textSecondary },
-  chipTextActive: { color: '#fff', fontWeight: '600' },
-  list: { padding: spacing.md },
-  footer: { padding: spacing.lg, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface },
+  header: { paddingHorizontal: 24, paddingTop: 20, gap: 16, paddingBottom: 10 },
+  list: { padding: 24 },
+  footer: { padding: 24, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface },
 });

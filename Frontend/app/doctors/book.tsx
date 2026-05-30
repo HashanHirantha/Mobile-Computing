@@ -6,6 +6,7 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { TopBar } from '../../components/TopBar';
+import { globalStyles } from '../../constants/globalStyles';
 
 const TIME_SLOTS = [
   { time: '09:00', label: '9:00 AM' },
@@ -148,24 +149,24 @@ export default function BookScreen() {
   const dates = getDates();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={globalStyles.safeArea}>
       <TopBar />
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView style={globalStyles.container} contentContainerStyle={globalStyles.content}>
 
         {/* Page Title */}
-        <Text style={styles.pageTitle}>Book Appointment</Text>
-        <Text style={styles.pageSubtitle}>
+        <Text style={globalStyles.pageTitle}>Book Appointment</Text>
+        <Text style={globalStyles.pageDescription}>
           Schedule your visit with your preferred specialist.
         </Text>
 
         {/* Doctor Mini Card */}
-        <View style={styles.doctorCard}>
+        <View style={globalStyles.profileCard}>
           <Image
             source={{ uri: doc?.profiles?.profile_image || 'https://i.pravatar.cc/150?img=11' }}
-            style={styles.doctorImage}
+            style={globalStyles.avatarLarge}
           />
-          <View style={styles.doctorInfo}>
-            <Text style={styles.doctorName}>{doctorName}</Text>
+          <View style={globalStyles.profileInfo}>
+            <Text style={globalStyles.profileName}>{doctorName}</Text>
             <View style={styles.specialtyBadge}>
               <Text style={styles.specialtyText}>{doc?.specialty?.toUpperCase() || 'CARDIOLOGIST'}</Text>
             </View>
@@ -177,10 +178,10 @@ export default function BookScreen() {
         </View>
 
         {/* Date Selection */}
-        <View style={styles.sectionCard}>
+        <View style={globalStyles.cardPadded}>
           <View style={styles.sectionHeader}>
             <Feather name="calendar" size={16} color="#2E4A62" />
-            <Text style={styles.sectionLabel}>SELECT DATE</Text>
+            <Text style={globalStyles.sectionTitle}>SELECT DATE</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.dateRow}>
@@ -204,10 +205,10 @@ export default function BookScreen() {
         </View>
 
         {/* Time Selection */}
-        <View style={styles.sectionCard}>
+        <View style={globalStyles.cardPadded}>
           <View style={styles.sectionHeader}>
             <Feather name="clock" size={16} color="#2E4A62" />
-            <Text style={styles.sectionLabel}>SELECT TIME</Text>
+            <Text style={globalStyles.sectionTitle}>SELECT TIME</Text>
           </View>
           <View style={styles.timeGrid}>
             {TIME_SLOTS.map((slot) => {
@@ -227,10 +228,10 @@ export default function BookScreen() {
         </View>
 
         {/* Notes */}
-        <View style={styles.sectionCard}>
+        <View style={globalStyles.cardPadded}>
           <View style={styles.sectionHeader}>
             <Feather name="edit-3" size={16} color="#2E4A62" />
-            <Text style={styles.sectionLabel}>ADDITIONAL NOTES</Text>
+            <Text style={globalStyles.sectionTitle}>ADDITIONAL NOTES</Text>
           </View>
           <TextInput
             style={styles.notesInput}
@@ -274,16 +275,16 @@ export default function BookScreen() {
       {/* Fixed Confirm Button */}
       <View style={styles.confirmBarContainer}>
         <TouchableOpacity
-          style={[styles.confirmButton, (!selectedDate || !selectedTime) && styles.confirmButtonDisabled]}
+          style={[globalStyles.buttonPrimary, (!selectedDate || !selectedTime) && styles.confirmButtonDisabled]}
           activeOpacity={0.8}
           onPress={handleBook}
           disabled={loading}
         >
           {loading ? (
-            <Text style={styles.confirmButtonText}>Booking...</Text>
+            <Text style={globalStyles.buttonPrimaryText}>Booking...</Text>
           ) : (
             <>
-              <Text style={styles.confirmButtonText}>Confirm Booking</Text>
+              <Text style={globalStyles.buttonPrimaryText}>Confirm Booking</Text>
               <Feather name="check-circle" size={20} color="#FFFFFF" />
             </>
           )}
@@ -294,57 +295,6 @@ export default function BookScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 24,
-  },
-
-  // Page Title
-  pageTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  pageSubtitle: {
-    fontSize: 15,
-    color: '#4A5568',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-
-  // Doctor Mini Card
-  doctorCard: {
-    backgroundColor: '#C8E8FE',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  doctorImage: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    marginRight: 14,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.6)',
-  },
-  doctorInfo: {
-    flex: 1,
-  },
-  doctorName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A1A',
-    marginBottom: 4,
-  },
   specialtyBadge: {
     backgroundColor: 'rgba(255,255,255,0.6)',
     alignSelf: 'flex-start',
@@ -377,24 +327,12 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
   },
 
-  // Section Card
-  sectionCard: {
-    backgroundColor: '#C8E8FE',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-  },
+  // Section Header
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginBottom: 16,
-  },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2E4A62',
-    letterSpacing: 1,
   },
 
   // Date Chips
@@ -508,21 +446,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.05)',
   },
-  confirmButton: {
-    backgroundColor: '#111827',
-    borderRadius: 14,
-    paddingVertical: 18,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-  },
   confirmButtonDisabled: {
     opacity: 0.5,
-  },
-  confirmButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
   },
 });
